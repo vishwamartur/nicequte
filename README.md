@@ -80,7 +80,7 @@ A comprehensive web application for generating professional quotations and estim
 3. **Set up environment variables**
    Create a `.env` file in the root directory:
    ```env
-   DATABASE_URL="mongodb+srv://root:root@vishwa.hgb4t.mongodb.net/invgen?retryWrites=true&w=majority&appName=vishwa"
+   DATABASE_URL="mongodb+srv://root:password@vishwa.hgb4t.mongodb.net/invgen?retryWrites=true&w=majority&appName=vishwa"
    ```
 
 4. **Set up the database**
