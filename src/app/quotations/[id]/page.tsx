@@ -5,13 +5,13 @@ import { useParams, useRouter } from 'next/navigation'
 import Layout from '@/components/layout/Layout'
 import QuotationPreview from '@/components/quotation/QuotationPreview'
 import { ToastContainer, useToast } from '@/components/ui/Toast'
-import { 
-  ArrowLeft, 
-  Edit, 
-  Printer, 
-  Download, 
-  Send, 
-  CheckCircle, 
+import {
+  ArrowLeft,
+  Edit,
+  Printer,
+  Download,
+  Send,
+  CheckCircle,
   XCircle,
   Clock,
   AlertTriangle,
@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { generateQuotationPDF, printElement } from '@/lib/pdf-generator'
+import '../../../styles/pdf-compatible.css'
 
 interface QuotationItem {
   id: string

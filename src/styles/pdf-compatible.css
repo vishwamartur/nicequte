@@ -1,0 +1,297 @@
+/* PDF-compatible CSS overrides for html2canvas */
+/* This file contains CSS overrides to ensure compatibility with html2canvas and PDF generation */
+
+/* Force compatible colors for PDF generation */
+.pdf-compatible {
+  /* Override any Lab/LCH color functions with hex/rgb equivalents */
+  --tw-text-opacity: 1;
+  --tw-bg-opacity: 1;
+  --tw-border-opacity: 1;
+}
+
+/* Status badge colors - PDF compatible */
+.pdf-compatible .bg-gray-100 {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+}
+
+.pdf-compatible .bg-blue-100 {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+.pdf-compatible .bg-green-100 {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+.pdf-compatible .bg-red-100 {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+.pdf-compatible .bg-orange-100 {
+  background-color: #fed7aa !important;
+  color: #9a3412 !important;
+}
+
+/* Text colors - PDF compatible */
+.pdf-compatible .text-gray-900 {
+  color: #111827 !important;
+}
+
+.pdf-compatible .text-gray-800 {
+  color: #1f2937 !important;
+}
+
+.pdf-compatible .text-gray-700 {
+  color: #374151 !important;
+}
+
+.pdf-compatible .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.pdf-compatible .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+.pdf-compatible .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+/* Background colors - PDF compatible */
+.pdf-compatible .bg-white {
+  background-color: #ffffff !important;
+}
+
+.pdf-compatible .bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+.pdf-compatible .bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+
+.pdf-compatible .bg-gray-200 {
+  background-color: #e5e7eb !important;
+}
+
+/* Border colors - PDF compatible */
+.pdf-compatible .border-gray-200 {
+  border-color: #e5e7eb !important;
+}
+
+.pdf-compatible .border-gray-300 {
+  border-color: #d1d5db !important;
+}
+
+.pdf-compatible .border-gray-400 {
+  border-color: #9ca3af !important;
+}
+
+/* Remove problematic CSS properties */
+.pdf-compatible * {
+  backdrop-filter: none !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  isolation: auto !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Ensure proper layout for PDF */
+.pdf-compatible {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  line-height: 1.4 !important;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Table styles for PDF */
+.pdf-compatible table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+}
+
+.pdf-compatible th,
+.pdf-compatible td {
+  border: 1px solid #d1d5db !important;
+  padding: 8px !important;
+  text-align: left !important;
+  background-color: transparent !important;
+}
+
+.pdf-compatible th {
+  background-color: #f9fafb !important;
+  font-weight: bold !important;
+  color: #111827 !important;
+}
+
+/* Ensure visibility of all text */
+.pdf-compatible * {
+  color: inherit !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Override any transparent backgrounds */
+.pdf-compatible .bg-transparent {
+  background-color: transparent !important;
+}
+
+/* Ensure proper spacing */
+.pdf-compatible .space-y-4 > * + * {
+  margin-top: 1rem !important;
+}
+
+.pdf-compatible .space-y-2 > * + * {
+  margin-top: 0.5rem !important;
+}
+
+/* Button and interactive element overrides */
+.pdf-compatible button,
+.pdf-compatible .btn {
+  display: none !important;
+}
+
+.pdf-compatible .no-pdf {
+  display: none !important;
+}
+
+/* Flex layout fixes */
+.pdf-compatible .flex {
+  display: flex !important;
+}
+
+.pdf-compatible .justify-between {
+  justify-content: space-between !important;
+}
+
+.pdf-compatible .items-center {
+  align-items: center !important;
+}
+
+.pdf-compatible .items-start {
+  align-items: flex-start !important;
+}
+
+/* Grid layout fixes */
+.pdf-compatible .grid {
+  display: grid !important;
+}
+
+.pdf-compatible .grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.pdf-compatible .grid-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.pdf-compatible .grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+/* Spacing utilities */
+.pdf-compatible .p-4 {
+  padding: 1rem !important;
+}
+
+.pdf-compatible .p-6 {
+  padding: 1.5rem !important;
+}
+
+.pdf-compatible .px-4 {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+.pdf-compatible .py-2 {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.pdf-compatible .mb-4 {
+  margin-bottom: 1rem !important;
+}
+
+.pdf-compatible .mb-6 {
+  margin-bottom: 1.5rem !important;
+}
+
+.pdf-compatible .mt-4 {
+  margin-top: 1rem !important;
+}
+
+.pdf-compatible .mt-6 {
+  margin-top: 1.5rem !important;
+}
+
+/* Typography */
+.pdf-compatible .text-sm {
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+}
+
+.pdf-compatible .text-base {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+}
+
+.pdf-compatible .text-lg {
+  font-size: 1.125rem !important;
+  line-height: 1.75rem !important;
+}
+
+.pdf-compatible .text-xl {
+  font-size: 1.25rem !important;
+  line-height: 1.75rem !important;
+}
+
+.pdf-compatible .text-2xl {
+  font-size: 1.5rem !important;
+  line-height: 2rem !important;
+}
+
+.pdf-compatible .font-medium {
+  font-weight: 500 !important;
+}
+
+.pdf-compatible .font-semibold {
+  font-weight: 600 !important;
+}
+
+.pdf-compatible .font-bold {
+  font-weight: 700 !important;
+}
+
+/* Text alignment */
+.pdf-compatible .text-left {
+  text-align: left !important;
+}
+
+.pdf-compatible .text-center {
+  text-align: center !important;
+}
+
+.pdf-compatible .text-right {
+  text-align: right !important;
+}
+
+/* Rounded corners - simplified for PDF */
+.pdf-compatible .rounded,
+.pdf-compatible .rounded-md,
+.pdf-compatible .rounded-lg {
+  border-radius: 4px !important;
+}
+
+/* Shadow removal */
+.pdf-compatible .shadow,
+.pdf-compatible .shadow-sm,
+.pdf-compatible .shadow-md,
+.pdf-compatible .shadow-lg,
+.pdf-compatible .shadow-xl {
+  box-shadow: none !important;
+}

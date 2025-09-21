@@ -90,7 +90,7 @@ export default function QuotationPreview({
       </div>
 
       {/* Quotation Document */}
-      <div className="max-w-4xl mx-auto bg-white shadow-lg print:shadow-none" id="quotation-preview">
+      <div className="max-w-4xl mx-auto bg-white shadow-lg print:shadow-none pdf-compatible" id="quotation-preview">
         <div className="p-8">
           {/* Header */}
           <div className="flex justify-between items-start mb-8 print-header">
