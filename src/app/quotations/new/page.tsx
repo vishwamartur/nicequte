@@ -46,6 +46,15 @@ interface BusinessName {
   isActive: boolean
 }
 
+interface Customer {
+  id: string
+  name: string
+  email: string | null
+  phone: string | null
+  address: string | null
+  gstNumber: string | null
+}
+
 export default function NewQuotationPage() {
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
@@ -59,6 +68,10 @@ export default function NewQuotationPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [businessNames, setBusinessNames] = useState<BusinessName[]>([])
   const [selectedBusinessNameId, setSelectedBusinessNameId] = useState<string>('')
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('')
+  const [customerSelectionMode, setCustomerSelectionMode] = useState<'select' | 'manual'>('select')
+  const [saveCustomer, setSaveCustomer] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [showProductSearch, setShowProductSearch] = useState(false)
   const [gstRate, setGstRate] = useState(18)
@@ -100,11 +113,23 @@ export default function NewQuotationPage() {
     }
   }
 
+  // Load customers
+  const loadCustomers = async () => {
+    try {
+      const response = await fetch('/api/customers?limit=100')
+      const data = await response.json()
+      setCustomers(data.customers)
+    } catch (error) {
+      console.error('Error loading customers:', error)
+    }
+  }
+
   useEffect(() => {
     // Generate quotation number on client side only to avoid hydration mismatch
     setQuotationNumber(generateQuotationNumber())
     loadProducts()
     loadBusinessNames()
+    loadCustomers()
   }, [])
 
   useEffect(() => {
@@ -112,6 +137,33 @@ export default function NewQuotationPage() {
       loadProducts(searchTerm)
     }
   }, [searchTerm])
+
+  // Handle customer selection
+  const handleCustomerSelect = (customerId: string) => {
+    const customer = customers.find(c => c.id === customerId)
+    if (customer) {
+      setCustomerInfo({
+        name: customer.name,
+        email: customer.email || '',
+        phone: customer.phone || '',
+        address: customer.address || '',
+        gstNumber: customer.gstNumber || ''
+      })
+      setSelectedCustomerId(customerId)
+    }
+  }
+
+  // Clear customer selection
+  const clearCustomerSelection = () => {
+    setSelectedCustomerId('')
+    setCustomerInfo({
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      gstNumber: ''
+    })
+  }
 
   // Add product to quotation
   const addProduct = (product: Product) => {
@@ -189,7 +241,9 @@ export default function NewQuotationPage() {
         title: title || null,
         description: description || null,
         notes: notes || null,
-        validUntil: validUntil.toISOString()
+        validUntil: validUntil.toISOString(),
+        saveCustomer: customerSelectionMode === 'manual' ? saveCustomer : false,
+        selectedCustomerId: customerSelectionMode === 'select' ? selectedCustomerId : null
       }
 
       const response = await fetch('/api/quotations', {
@@ -370,65 +424,158 @@ export default function NewQuotationPage() {
           {/* Customer Information */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Customer Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Customer Name *
+
+            {/* Customer Selection Mode */}
+            <div className="mb-6">
+              <div className="flex space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="customerMode"
+                    value="select"
+                    checked={customerSelectionMode === 'select'}
+                    onChange={(e) => setCustomerSelectionMode(e.target.value as 'select' | 'manual')}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Select existing customer</span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={customerInfo.name}
-                  onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="customerMode"
+                    value="manual"
+                    checked={customerSelectionMode === 'manual'}
+                    onChange={(e) => setCustomerSelectionMode(e.target.value as 'select' | 'manual')}
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">Enter customer details manually</span>
                 </label>
-                <input
-                  type="email"
-                  value={customerInfo.email}
-                  onChange={(e) => setCustomerInfo({...customerInfo, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  value={customerInfo.phone}
-                  onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  GST Number
-                </label>
-                <input
-                  type="text"
-                  value={customerInfo.gstNumber}
-                  onChange={(e) => setCustomerInfo({...customerInfo, gstNumber: e.target.value})}
-                  placeholder="e.g., 29ABCDE1234F1Z5"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
               </div>
             </div>
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Address
-              </label>
-              <textarea
-                value={customerInfo.address}
-                onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+
+            {/* Customer Selection Dropdown */}
+            {customerSelectionMode === 'select' && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Customer *
+                </label>
+                <select
+                  value={selectedCustomerId}
+                  onChange={(e) => handleCustomerSelect(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  required={customerSelectionMode === 'select'}
+                >
+                  <option value="">Choose a customer...</option>
+                  {customers.map((customer) => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.name} {customer.email ? `(${customer.email})` : ''}
+                    </option>
+                  ))}
+                </select>
+                {customers.length === 0 && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    No customers available.
+                    <a href="/customers" className="text-blue-600 hover:text-blue-800 ml-1">
+                      Create one here
+                    </a>
+                  </p>
+                )}
+                {selectedCustomerId && (
+                  <button
+                    type="button"
+                    onClick={clearCustomerSelection}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    Clear selection and enter manually
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Manual Customer Entry or Selected Customer Display */}
+            {(customerSelectionMode === 'manual' || selectedCustomerId) && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Customer Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={customerInfo.name}
+                      onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      disabled={customerSelectionMode === 'select' && selectedCustomerId !== ''}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={customerInfo.email}
+                      onChange={(e) => setCustomerInfo({...customerInfo, email: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      disabled={customerSelectionMode === 'select' && selectedCustomerId !== ''}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Phone
+                    </label>
+                    <input
+                      type="tel"
+                      value={customerInfo.phone}
+                      onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      disabled={customerSelectionMode === 'select' && selectedCustomerId !== ''}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      GST Number
+                    </label>
+                    <input
+                      type="text"
+                      value={customerInfo.gstNumber}
+                      onChange={(e) => setCustomerInfo({...customerInfo, gstNumber: e.target.value})}
+                      placeholder="e.g., 29ABCDE1234F1Z5"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      disabled={customerSelectionMode === 'select' && selectedCustomerId !== ''}
+                    />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Address
+                  </label>
+                  <textarea
+                    value={customerInfo.address}
+                    onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                    disabled={customerSelectionMode === 'select' && selectedCustomerId !== ''}
+                  />
+                </div>
+
+                {/* Save Customer Option for Manual Entry */}
+                {customerSelectionMode === 'manual' && (
+                  <div className="mt-4">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={saveCustomer}
+                        onChange={(e) => setSaveCustomer(e.target.checked)}
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-gray-700">Save this customer for future use</span>
+                    </label>
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           {/* Products Section */}

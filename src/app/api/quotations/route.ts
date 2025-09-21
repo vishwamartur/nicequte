@@ -177,7 +177,9 @@ export async function POST(request: NextRequest) {
       title,
       description,
       notes,
-      validUntil
+      validUntil,
+      saveCustomer,
+      selectedCustomerId
     } = body
 
     if (!customerInfo?.name || !items || items.length === 0) {
@@ -202,37 +204,67 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Create or find customer
-    let customer = await prisma.customer.findFirst({
-      where: {
-        OR: [
-          { email: customerInfo.email },
-          { name: customerInfo.name }
-        ]
-      }
-    })
+    // Handle customer creation/selection
+    let customer
 
-    if (!customer) {
-      customer = await prisma.customer.create({
-        data: {
-          name: customerInfo.name,
-          email: customerInfo.email || null,
-          phone: customerInfo.phone || null,
-          address: customerInfo.address || null,
-          gstNumber: customerInfo.gstNumber || null,
-        }
+    if (selectedCustomerId) {
+      // Use existing selected customer
+      customer = await prisma.customer.findUnique({
+        where: { id: selectedCustomerId }
       })
+
+      if (!customer) {
+        return NextResponse.json(
+          { error: 'Selected customer not found' },
+          { status: 400 }
+        )
+      }
     } else {
-      // Update customer info if provided
-      customer = await prisma.customer.update({
-        where: { id: customer.id },
-        data: {
-          email: customerInfo.email || customer.email,
-          phone: customerInfo.phone || customer.phone,
-          address: customerInfo.address || customer.address,
-          gstNumber: customerInfo.gstNumber || customer.gstNumber,
+      // Handle manual customer entry
+      if (saveCustomer) {
+        // Check if customer already exists
+        const existingCustomer = await prisma.customer.findFirst({
+          where: {
+            name: customerInfo.name,
+            email: customerInfo.email || null
+          }
+        })
+
+        if (existingCustomer) {
+          // Update existing customer
+          customer = await prisma.customer.update({
+            where: { id: existingCustomer.id },
+            data: {
+              email: customerInfo.email || existingCustomer.email,
+              phone: customerInfo.phone || existingCustomer.phone,
+              address: customerInfo.address || existingCustomer.address,
+              gstNumber: customerInfo.gstNumber || existingCustomer.gstNumber,
+            }
+          })
+        } else {
+          // Create new customer
+          customer = await prisma.customer.create({
+            data: {
+              name: customerInfo.name,
+              email: customerInfo.email || null,
+              phone: customerInfo.phone || null,
+              address: customerInfo.address || null,
+              gstNumber: customerInfo.gstNumber || null,
+            }
+          })
         }
-      })
+      } else {
+        // Create temporary customer (one-time use)
+        customer = await prisma.customer.create({
+          data: {
+            name: customerInfo.name,
+            email: customerInfo.email || null,
+            phone: customerInfo.phone || null,
+            address: customerInfo.address || null,
+            gstNumber: customerInfo.gstNumber || null,
+          }
+        })
+      }
     }
 
     // Generate unique quotation number
