@@ -1,6 +1,60 @@
-# React Hydration Mismatch Fix - InvGen Quotation Generator
+# React Hydration Mismatch Fixes - InvGen Quotation Generator
 
-## Problem Description
+## Fix #1: Browser Extension Body Element Hydration Mismatch (Latest)
+
+### Problem Description
+React hydration mismatch error occurring in the root layout component (`src/app/layout.tsx`) at line 27 (the `<body>` element).
+
+### Root Cause
+Browser extensions (like Grammarly) inject attributes into the body element after server-side rendering but before client-side hydration:
+
+**Server-rendered HTML (clean):**
+```html
+<body className="geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__var...">
+```
+
+**Client-side HTML (with extension attributes):**
+```html
+<body
+  className="geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__var..."
+  data-new-gr-c-s-check-loaded="14.1254.0"
+  data-gr-ext-installed=""
+>
+```
+
+### Solution Implemented
+Added `suppressHydrationWarning={true}` to the `<body>` element in `src/app/layout.tsx`:
+
+**Before:**
+```tsx
+<body
+  className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+>
+```
+
+**After:**
+```tsx
+<body
+  className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+  suppressHydrationWarning={true}
+>
+```
+
+### Why This Solution Works
+- **Safe for Body Element**: Browser extension attributes don't affect application functionality
+- **Targeted Fix**: Specifically addresses unavoidable DOM modifications by browser extensions
+- **React Best Practice**: Using `suppressHydrationWarning` for cases where hydration differences are expected and harmless
+
+### Status
+✅ **RESOLVED** - No more body element hydration mismatch errors
+🚀 **Improved** - Clean console output without false-positive warnings
+✅ **Compatible** - Works with various browser extensions (Grammarly, LastPass, etc.)
+
+---
+
+## Fix #2: Quotation Number Generation Hydration Mismatch (Previous)
+
+### Problem Description
 
 ### Issue
 React hydration mismatch error occurring on the new quotation page (`/quotations/new`) at line 224.

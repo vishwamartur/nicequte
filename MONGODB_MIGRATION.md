@@ -30,7 +30,6 @@ model Company {
   phone       String?
   email       String?
   gstNumber   String?
-  logo        String?
   gstRate     Float    @default(18.0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

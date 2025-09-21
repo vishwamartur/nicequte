@@ -112,12 +112,6 @@ export default function QuotationPreview({
           {/* Header */}
           <div className="flex justify-between items-start mb-8 print-header">
             <div className="company-info">
-              {/* Company Logo Placeholder */}
-              <div className="mb-4">
-                <div className="w-32 h-16 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center company-logo print:border-solid print:border-gray-400">
-                  <span className="text-xs text-gray-500 print:text-gray-700">Company Logo</span>
-                </div>
-              </div>
               <h2 className="text-xl font-bold text-blue-600 mb-2 print:text-black">{companyInfo.name}</h2>
               <div className="text-sm text-gray-600 space-y-1 print:text-black">
                 <p>{companyInfo.address}</p>

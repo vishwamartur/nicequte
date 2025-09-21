@@ -109,11 +109,7 @@ export function printElement(elementId: string) {
           color: #666;
         }
         
-        /* Company logo and branding */
-        .company-logo {
-          max-height: 60px;
-          max-width: 200px;
-        }
+
         
         /* Quotation specific styles */
         .quotation-header {

@@ -170,11 +170,10 @@ model BusinessName {
 
 ## 6. Future Enhancements
 
-1. **Business Logo Support**: Add logo upload for each business name
-2. **Business Templates**: Pre-configured quotation templates per business
-3. **Multi-Currency Support**: Support for different currencies per business
-4. **Business Analytics**: Revenue tracking per business entity
-5. **Business-Specific Products**: Product catalogs per business name
+1. **Business Templates**: Pre-configured quotation templates per business
+2. **Multi-Currency Support**: Support for different currencies per business
+3. **Business Analytics**: Revenue tracking per business entity
+4. **Business-Specific Products**: Product catalogs per business name
 
 ## 7. Files Modified/Created
 

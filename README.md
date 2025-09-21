@@ -173,7 +173,6 @@ Update company details in the database or through the seeding process:
 - Company name and address
 - Contact information
 - GST registration number
-- Logo (future enhancement)
 
 ## Development
 
