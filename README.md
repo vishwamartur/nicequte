@@ -1,36 +1,232 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# InvGen - Professional Quotation Generator
+
+A comprehensive web application for generating professional quotations and estimates for plumbing and electrical work with automatic GST calculations.
+
+## Features
+
+### 🧾 **Core Functionality**
+- Generate professional quotations/estimates for plumbing and electrical work
+- Automatic GST calculation with configurable tax rates (default 18%)
+- Comprehensive product catalog with categories for plumbing and electrical materials
+- Professional PDF generation and printing capabilities
+
+### 📦 **Product Management**
+- **Plumbing Materials**: Pipes, fittings, fixtures, valves, taps, toilet seats, etc.
+- **Electrical Materials**: Wires, switches, outlets, breakers, conduits, LED bulbs, etc.
+- Product search and filtering by category
+- Detailed product specifications and pricing
+- SKU-based inventory tracking
+
+### 💰 **Advanced Calculations**
+- Real-time quantity and pricing calculations
+- Automatic GST breakdown (CGST/SGST or IGST)
+- Line-item totals with subtotal and final amount
+- Configurable tax rates per quotation
+- Professional tax breakdown display
+
+### 📄 **Professional Output**
+- Clean, professional quotation layout
+- Company branding and customer information
+- Itemized product listing with specifications
+- Tax breakdown and total calculations
+- PDF export and print functionality
+- 30-day validity period (configurable)
+
+### 🗄️ **Data Management**
+- PostgreSQL database with Prisma ORM
+- Customer information management
+- Quotation history and status tracking
+- Product catalog management
+- Company settings and configuration
+
+## Technology Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS 4
+- **Database**: PostgreSQL with Prisma ORM
+- **PDF Generation**: jsPDF with html2canvas
+- **Icons**: Lucide React
+- **Form Handling**: React Hook Form with Zod validation
+- **Date Handling**: date-fns
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+
+- PostgreSQL database
+- npm or yarn package manager
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd invgen
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+
+   Update the `.env` file with your database connection:
+   ```env
+   DATABASE_URL=postgresql://username:password@localhost:5432/invgen
+   ```
+
+4. **Set up the database**
+   ```bash
+   # Generate Prisma client
+   npx prisma generate
+
+   # Run database migrations
+   npx prisma migrate dev --name init
+   ```
+
+5. **Seed the database with sample data**
+   ```bash
+   npm run dev
+   ```
+   Then visit the application and click "Seed Database" on the dashboard.
+
+6. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+7. **Open the application**
+   Visit [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Usage Guide
+
+### 1. **Initialize Sample Data**
+- Visit the dashboard and click "Seed Database" to populate with sample products
+- This adds plumbing and electrical materials with realistic pricing
+
+### 2. **Browse Products**
+- Navigate to "Products" to view the catalog
+- Filter by category (Plumbing/Electrical)
+- Search by product name, description, or SKU
+- View detailed specifications and pricing
+
+### 3. **Create Quotations**
+- Click "New Quotation" from dashboard or navigation
+- Fill in customer information (name is required)
+- Add products by searching and selecting from catalog
+- Adjust quantities as needed
+- Configure GST rate (default 18%)
+- Add title, description, and notes
+- Save the quotation
+
+### 4. **Manage Quotations**
+- View all quotations in the "Quotations" section
+- Filter by status (Draft, Sent, Accepted, etc.)
+- Search by quotation number or customer name
+- Export to PDF or print quotations
+
+## Database Schema
+
+### Key Models
+- **Company**: Business information and GST settings
+- **Category**: Product categories (Plumbing/Electrical)
+- **Product**: Product catalog with pricing and specifications
+- **Customer**: Customer information and GST details
+- **Quotation**: Main quotation with totals and metadata
+- **QuotationItem**: Individual line items in quotations
+
+## API Endpoints
+
+### Products
+- `GET /api/products` - List products with filtering
+- `POST /api/products` - Create new product
+- `GET /api/categories` - List product categories
+
+### Quotations
+- `GET /api/quotations` - List quotations with filtering
+- `POST /api/quotations` - Create new quotation
+- `GET /api/quotations/[id]` - Get specific quotation
+- `PUT /api/quotations/[id]` - Update quotation
+- `DELETE /api/quotations/[id]` - Delete quotation
+
+### Utilities
+- `POST /api/seed` - Seed database with sample data
+
+## Configuration
+
+### GST Settings
+- Default GST rate: 18% (configurable per quotation)
+- Automatic CGST/SGST breakdown for intra-state transactions
+- IGST calculation for inter-state transactions
+- GST number validation and display
+
+### Company Information
+Update company details in the database or through the seeding process:
+- Company name and address
+- Contact information
+- GST registration number
+- Logo (future enhancement)
+
+## Development
+
+### Project Structure
+```
+src/
+├── app/                 # Next.js app router pages
+├── components/          # Reusable React components
+├── lib/                 # Utility functions and configurations
+├── generated/           # Prisma generated client
+└── prisma/             # Database schema and migrations
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Key Components
+- `Layout`: Main application layout with navigation
+- `QuotationPreview`: Professional quotation display
+- `ProductCatalog`: Product browsing and selection
+- `QuotationForm`: Quotation creation interface
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Database Operations
+- Prisma ORM for type-safe database operations
+- Automatic migrations and schema management
+- Seeding utilities for sample data
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment
 
-## Learn More
+### Production Build
+```bash
+npm run build
+npm start
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Environment Variables
+Ensure all environment variables are set in production:
+- `DATABASE_URL`: PostgreSQL connection string
+- `NODE_ENV`: Set to "production"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This project is licensed under the MIT License.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Support
+
+For support and questions:
+- Create an issue in the repository
+- Check the documentation
+- Review the API endpoints
+
+---
+
+**InvGen** - Professional quotation generation made simple and efficient.

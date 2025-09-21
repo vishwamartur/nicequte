@@ -24,3 +24,227 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Print Styles */
+@media print {
+  /* Hide elements that shouldn't be printed */
+  .no-print,
+  .print-hidden,
+  button:not(.print-button),
+  .btn:not(.print-button),
+  nav,
+  .navigation,
+  .sidebar,
+  .header-actions,
+  .action-buttons,
+  .toast-container,
+  .modal-overlay,
+  .dropdown-menu {
+    display: none !important;
+  }
+
+  /* Reset page margins and ensure proper layout */
+  @page {
+    margin: 0.5in;
+    size: A4;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #000 !important;
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Ensure content fits properly */
+  .print-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Table styles for print */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+
+  th, td {
+    border: 1px solid #ddd !important;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f5f5f5 !important;
+    font-weight: bold;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+  }
+
+  /* Headers and footers */
+  .print-header {
+    margin-bottom: 30px;
+    border-bottom: 2px solid #333 !important;
+    padding-bottom: 20px;
+  }
+
+  .print-footer {
+    margin-top: 30px;
+    border-top: 1px solid #ddd !important;
+    padding-top: 20px;
+    font-size: 10px;
+    color: #666 !important;
+  }
+
+  /* Company logo and branding */
+  .company-logo {
+    max-height: 60px;
+    max-width: 200px;
+  }
+
+  /* Quotation specific styles */
+  .quotation-preview {
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .quotation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+  }
+
+  .quotation-details {
+    text-align: right;
+  }
+
+  .quotation-number {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333 !important;
+  }
+
+  .customer-info, .company-info {
+    margin-bottom: 20px;
+  }
+
+  .info-label {
+    font-weight: bold;
+    color: #333 !important;
+  }
+
+  .items-table th {
+    background-color: #f8f9fa !important;
+  }
+
+  .total-section {
+    margin-top: 20px;
+    text-align: right;
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+  }
+
+  .total-row.final {
+    border-top: 2px solid #333 !important;
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  /* Ensure proper spacing */
+  h1, h2, h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333 !important;
+  }
+
+  p {
+    margin: 5px 0;
+  }
+
+  /* Status badges */
+  .status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 1px solid #ddd !important;
+  }
+
+  /* Force colors for status badges */
+  .bg-gray-100 { background-color: #f3f4f6 !important; color: #374151 !important; }
+  .bg-blue-100 { background-color: #dbeafe !important; color: #1e40af !important; }
+  .bg-green-100 { background-color: #d1fae5 !important; color: #065f46 !important; }
+  .bg-red-100 { background-color: #fee2e2 !important; color: #991b1b !important; }
+  .bg-orange-100 { background-color: #fed7aa !important; color: #9a3412 !important; }
+
+  /* Ensure text is black */
+  .text-gray-900,
+  .text-gray-800,
+  .text-gray-700 {
+    color: #000 !important;
+  }
+
+  .text-gray-600,
+  .text-gray-500 {
+    color: #666 !important;
+  }
+
+  /* Remove shadows and borders that don't print well */
+  .shadow,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+
+  .border-gray-200,
+  .border-gray-300 {
+    border-color: #ddd !important;
+  }
+
+  /* Ensure proper layout for flex items */
+  .flex {
+    display: flex !important;
+  }
+
+  .justify-between {
+    justify-content: space-between !important;
+  }
+
+  .items-center {
+    align-items: center !important;
+  }
+
+  /* Print-specific utilities */
+  .print-only {
+    display: block !important;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+}

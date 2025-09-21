@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Company settings and configuration
+model Company {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  address     String?
+  phone       String?
+  email       String?
+  gstNumber   String?
+  logo        String?  // URL or base64 encoded image
+  gstRate     Float    @default(18.0) // Default GST rate in percentage
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  quotations  Quotation[]
+
+  @@map("companies")
+}
+
+// Product categories (Plumbing, Electrical, etc.)
+model Category {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  type        CategoryType // PLUMBING or ELECTRICAL
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
+
+  @@map("categories")
+}
+
+// Products catalog
+model Product {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  description  String?
+  specifications String? // JSON string for detailed specs
+  unitPrice    Float
+  unit         String   @default("piece") // piece, meter, kg, etc.
+  sku          String?  @unique
+  categoryId   String   @db.ObjectId
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category     Category @relation(fields: [categoryId], references: [id])
+  quotationItems QuotationItem[]
+
+  @@map("products")
+}
+
+// Customer information
+model Customer {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  gstNumber String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quotations Quotation[]
+
+  @@map("customers")
+}
+
+// Main quotation/estimate
+model Quotation {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  quotationNumber String @unique
+  customerId    String   @db.ObjectId
+  companyId     String   @db.ObjectId
+  title         String?
+  description   String?
+  subtotal      Float    @default(0)
+  gstAmount     Float    @default(0)
+  gstRate       Float    @default(18.0)
+  totalAmount   Float    @default(0)
+  status        QuotationStatus @default(DRAFT)
+  validUntil    DateTime?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  customer      Customer @relation(fields: [customerId], references: [id])
+  company       Company  @relation(fields: [companyId], references: [id])
+  items         QuotationItem[]
+
+  @@map("quotations")
+}
+
+// Individual line items in a quotation
+model QuotationItem {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  quotationId  String   @db.ObjectId
+  productId    String   @db.ObjectId
+  quantity     Float
+  unitPrice    Float
+  lineTotal    Float
+  description  String?  // Override product description if needed
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  quotation    Quotation @relation(fields: [quotationId], references: [id])
+  product      Product   @relation(fields: [productId], references: [id])
+
+  @@map("quotation_items")
+}
+
+// Enums
+enum CategoryType {
+  PLUMBING
+  ELECTRICAL
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
