@@ -20,10 +20,16 @@ interface Product {
 
 interface QuotationItem {
   id: string
-  product: Product
+  product: Product | null // null for custom products
+  customProduct?: {
+    name: string
+    description: string | null
+    unit: string
+  }
   quantity: number
   unitPrice: number
   lineTotal: number
+  isCustom: boolean
 }
 
 interface CustomerInfo {
@@ -74,6 +80,14 @@ export default function NewQuotationPage() {
   const [saveCustomer, setSaveCustomer] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [showProductSearch, setShowProductSearch] = useState(false)
+  const [showCustomProductForm, setShowCustomProductForm] = useState(false)
+  const [customProductForm, setCustomProductForm] = useState({
+    name: '',
+    description: '',
+    unit: 'piece',
+    unitPrice: '',
+    quantity: '1'
+  })
   const [gstRate, setGstRate] = useState(18)
   const [quotationNumber, setQuotationNumber] = useState<string>('')
   const [title, setTitle] = useState('')
@@ -165,10 +179,59 @@ export default function NewQuotationPage() {
     })
   }
 
+  // Add custom product to quotation
+  const addCustomProduct = () => {
+    if (!customProductForm.name.trim() || !customProductForm.unitPrice || !customProductForm.quantity) {
+      alert('Please fill in all required fields for the custom product.')
+      return
+    }
+
+    const unitPrice = parseFloat(customProductForm.unitPrice)
+    const quantity = parseFloat(customProductForm.quantity)
+
+    if (isNaN(unitPrice) || unitPrice <= 0) {
+      alert('Please enter a valid unit price.')
+      return
+    }
+
+    if (isNaN(quantity) || quantity <= 0) {
+      alert('Please enter a valid quantity.')
+      return
+    }
+
+    const newItem: QuotationItem = {
+      id: `custom-${Date.now()}-${Math.random()}`,
+      product: null,
+      customProduct: {
+        name: customProductForm.name.trim(),
+        description: customProductForm.description.trim() || null,
+        unit: customProductForm.unit
+      },
+      quantity,
+      unitPrice,
+      lineTotal: unitPrice * quantity,
+      isCustom: true
+    }
+
+    setQuotationItems(items => [...items, newItem])
+
+    // Reset form
+    setCustomProductForm({
+      name: '',
+      description: '',
+      unit: 'piece',
+      unitPrice: '',
+      quantity: '1'
+    })
+    setShowCustomProductForm(false)
+  }
+
   // Add product to quotation
   const addProduct = (product: Product) => {
-    const existingItem = quotationItems.find(item => item.product.id === product.id)
-    
+    const existingItem = quotationItems.find(item =>
+      !item.isCustom && item.product?.id === product.id
+    )
+
     if (existingItem) {
       updateQuantity(existingItem.id, existingItem.quantity + 1)
     } else {
@@ -177,11 +240,12 @@ export default function NewQuotationPage() {
         product,
         quantity: 1,
         unitPrice: product.unitPrice,
-        lineTotal: product.unitPrice
+        lineTotal: product.unitPrice,
+        isCustom: false
       }
       setQuotationItems([...quotationItems, newItem])
     }
-    
+
     setShowProductSearch(false)
     setSearchTerm('')
   }
@@ -582,14 +646,30 @@ export default function NewQuotationPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-gray-900">Products & Services</h2>
-              <button
-                type="button"
-                onClick={() => setShowProductSearch(!showProductSearch)}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Add Product</span>
-              </button>
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProductSearch(!showProductSearch)
+                    setShowCustomProductForm(false)
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Product</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCustomProductForm(!showCustomProductForm)
+                    setShowProductSearch(false)
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Custom Product</span>
+                </button>
+              </div>
             </div>
 
             {/* Product Search */}
@@ -632,6 +712,125 @@ export default function NewQuotationPage() {
               </div>
             )}
 
+            {/* Custom Product Form */}
+            {showCustomProductForm && (
+              <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Add Custom Product</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Product Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={customProductForm.name}
+                      onChange={(e) => setCustomProductForm({...customProductForm, name: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                      placeholder="Enter product name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Unit of Measurement
+                    </label>
+                    <select
+                      value={customProductForm.unit}
+                      onChange={(e) => setCustomProductForm({...customProductForm, unit: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                    >
+                      <option value="piece">Piece</option>
+                      <option value="meter">Meter</option>
+                      <option value="kg">Kilogram</option>
+                      <option value="liter">Liter</option>
+                      <option value="hour">Hour</option>
+                      <option value="day">Day</option>
+                      <option value="set">Set</option>
+                      <option value="box">Box</option>
+                      <option value="roll">Roll</option>
+                      <option value="sheet">Sheet</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Unit Price (₹) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={customProductForm.unitPrice}
+                      onChange={(e) => setCustomProductForm({...customProductForm, unitPrice: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Quantity *
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const qty = Math.max(1, parseFloat(customProductForm.quantity) - 1)
+                          setCustomProductForm({...customProductForm, quantity: qty.toString()})
+                        }}
+                        className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-900"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </button>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        value={customProductForm.quantity}
+                        onChange={(e) => setCustomProductForm({...customProductForm, quantity: e.target.value})}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-gray-900"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const qty = parseFloat(customProductForm.quantity) + 1
+                          setCustomProductForm({...customProductForm, quantity: qty.toString()})
+                        }}
+                        className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-900"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description (Optional)
+                  </label>
+                  <textarea
+                    value={customProductForm.description}
+                    onChange={(e) => setCustomProductForm({...customProductForm, description: e.target.value})}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                    placeholder="Enter product description"
+                  />
+                </div>
+                <div className="flex justify-end space-x-3 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomProductForm(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={addCustomProduct}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Add Custom Product
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Selected Products */}
             <div className="space-y-4">
               {quotationItems.length === 0 ? (
@@ -640,13 +839,29 @@ export default function NewQuotationPage() {
                 </div>
               ) : (
                 quotationItems.map((item) => (
-                  <div key={item.id} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
+                  <div key={item.id} className={`flex items-center space-x-4 p-4 border rounded-lg ${
+                    item.isCustom ? 'border-blue-200 bg-blue-50' : 'border-gray-200'
+                  }`}>
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{item.product.name}</h4>
-                      <p className="text-sm text-gray-600">{item.product.category.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {formatCurrency(item.unitPrice)} per {item.product.unit}
+                      <div className="flex items-center space-x-2">
+                        <h4 className="font-medium text-gray-900">
+                          {item.isCustom ? item.customProduct?.name : item.product?.name}
+                        </h4>
+                        {item.isCustom && (
+                          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                            Custom
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {item.isCustom ? 'Custom Product' : item.product?.category.name}
                       </p>
+                      <p className="text-sm text-gray-500">
+                        {formatCurrency(item.unitPrice)} per {item.isCustom ? item.customProduct?.unit : item.product?.unit}
+                      </p>
+                      {item.isCustom && item.customProduct?.description && (
+                        <p className="text-xs text-gray-500 mt-1">{item.customProduct.description}</p>
+                      )}
                     </div>
                     
                     <div className="flex items-center space-x-2">

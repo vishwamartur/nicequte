@@ -117,11 +117,15 @@ export async function PUT(
           return tx.quotationItem.create({
             data: {
               quotationId: id,
-              productId: item.product.id,
+              productId: item.isCustom ? null : item.product?.id,
               quantity: item.quantity,
               unitPrice: item.unitPrice,
               lineTotal: item.lineTotal,
               description: item.description || null,
+              isCustom: item.isCustom || false,
+              customName: item.isCustom ? item.customProduct?.name : null,
+              customUnit: item.isCustom ? item.customProduct?.unit : null,
+              customDescription: item.isCustom ? item.customProduct?.description : null,
             }
           })
         })

@@ -128,16 +128,23 @@ model Quotation {
 model QuotationItem {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   quotationId  String   @db.ObjectId
-  productId    String   @db.ObjectId
+  productId    String?  @db.ObjectId // Optional for custom products
   quantity     Float
   unitPrice    Float
   lineTotal    Float
   description  String?  // Override product description if needed
+
+  // Custom product fields
+  isCustom     Boolean  @default(false)
+  customName   String?  // Custom product name
+  customUnit   String?  // Custom product unit
+  customDescription String? // Custom product description
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   quotation    Quotation @relation(fields: [quotationId], references: [id])
-  product      Product   @relation(fields: [productId], references: [id])
+  product      Product?  @relation(fields: [productId], references: [id]) // Optional for custom products
 
   @@map("quotation_items")
 }

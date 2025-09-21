@@ -5,17 +5,23 @@ import { Download, Printer } from 'lucide-react'
 
 interface QuotationItem {
   id: string
-  product: {
+  product?: {
     name: string
     description: string | null
     unit: string
     category: {
       name: string
     }
+  } | null
+  customProduct?: {
+    name: string
+    description: string | null
+    unit: string
   }
   quantity: number
   unitPrice: number
   lineTotal: number
+  isCustom: boolean
 }
 
 interface CustomerInfo {
@@ -209,10 +215,23 @@ export default function QuotationPreview({
                     </td>
                     <td className="border border-gray-300 px-4 py-3 text-sm text-gray-900 print:text-black">
                       <div>
-                        <p className="font-medium">{item.product.name}</p>
-                        <p className="text-gray-600 text-xs print:text-gray-700">{item.product.category.name}</p>
-                        {item.product.description && (
-                          <p className="text-gray-500 text-xs mt-1 print:text-gray-600">{item.product.description}</p>
+                        <div className="flex items-center space-x-2">
+                          <p className="font-medium">
+                            {item.isCustom ? item.customProduct?.name : item.product?.name}
+                          </p>
+                          {item.isCustom && (
+                            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full print:bg-gray-200 print:text-gray-800">
+                              Custom
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gray-600 text-xs print:text-gray-700">
+                          {item.isCustom ? 'Custom Product' : item.product?.category.name}
+                        </p>
+                        {((item.isCustom && item.customProduct?.description) || (!item.isCustom && item.product?.description)) && (
+                          <p className="text-gray-500 text-xs mt-1 print:text-gray-600">
+                            {item.isCustom ? item.customProduct?.description : item.product?.description}
+                          </p>
                         )}
                       </div>
                     </td>
@@ -220,7 +239,7 @@ export default function QuotationPreview({
                       {item.quantity}
                     </td>
                     <td className="border border-gray-300 px-4 py-3 text-sm text-gray-900 text-center print:text-black">
-                      {item.product.unit}
+                      {item.isCustom ? item.customProduct?.unit : item.product?.unit}
                     </td>
                     <td className="border border-gray-300 px-4 py-3 text-sm text-gray-900 text-right print:text-black">
                       {formatCurrency(item.unitPrice)}

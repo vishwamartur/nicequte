@@ -296,11 +296,15 @@ export async function POST(request: NextRequest) {
         notes: notes || null,
         items: {
           create: items.map((item: any) => ({
-            productId: item.product.id,
+            productId: item.isCustom ? null : item.product?.id,
             quantity: parseFloat(item.quantity.toString()),
             unitPrice: parseFloat(item.unitPrice.toString()),
             lineTotal: parseFloat(item.lineTotal.toString()),
             description: item.description || null,
+            isCustom: item.isCustom || false,
+            customName: item.isCustom ? item.customProduct?.name : null,
+            customUnit: item.isCustom ? item.customProduct?.unit : null,
+            customDescription: item.isCustom ? item.customProduct?.description : null,
           }))
         }
       },
