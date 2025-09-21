@@ -62,7 +62,7 @@ export default function NewQuotationPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showProductSearch, setShowProductSearch] = useState(false)
   const [gstRate, setGstRate] = useState(18)
-  const [quotationNumber] = useState(generateQuotationNumber())
+  const [quotationNumber, setQuotationNumber] = useState<string>('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [notes, setNotes] = useState('')
@@ -101,6 +101,8 @@ export default function NewQuotationPage() {
   }
 
   useEffect(() => {
+    // Generate quotation number on client side only to avoid hydration mismatch
+    setQuotationNumber(generateQuotationNumber())
     loadProducts()
     loadBusinessNames()
   }, [])
@@ -162,6 +164,11 @@ export default function NewQuotationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!quotationNumber) {
+      alert('Please wait for the quotation number to be generated.')
+      return
+    }
+
     if (!customerInfo.name || quotationItems.length === 0 || !selectedBusinessNameId) {
       alert('Please fill in customer name, select a business name, and add at least one product.')
       return
@@ -221,7 +228,13 @@ export default function NewQuotationPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Create New Quotation</h1>
-            <p className="text-gray-600 mt-2">Quotation #{quotationNumber}</p>
+            <p className="text-gray-600 mt-2">
+              {quotationNumber ? (
+                <>Quotation #{quotationNumber} <span className="text-sm">(Preview)</span></>
+              ) : (
+                'Generating quotation number...'
+              )}
+            </p>
           </div>
           <div className="flex space-x-3">
             <button
@@ -233,10 +246,15 @@ export default function NewQuotationPage() {
             </button>
             <button
               onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              disabled={!quotationNumber}
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-2 ${
+                quotationNumber
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              }`}
             >
               <Save className="h-4 w-4" />
-              <span>Save Quotation</span>
+              <span>{quotationNumber ? 'Save Quotation' : 'Generating...'}</span>
             </button>
           </div>
         </div>
