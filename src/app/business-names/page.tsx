@@ -69,7 +69,7 @@ export default function BusinessNamesPage() {
     }
   }
 
-  const handleSave = async (businessNameData: Omit<BusinessName, 'id' | 'isActive'>) => {
+  const handleSave = async (businessNameData: Omit<BusinessName, 'id' | 'isActive' | 'createdAt' | 'updatedAt'>) => {
     try {
       const url = editingBusinessName 
         ? `/api/business-names/${editingBusinessName.id}`
@@ -369,7 +369,8 @@ export default function BusinessNamesPage() {
           message={`Are you sure you want to delete "${deleteConfirm.businessName?.name}"? This action cannot be undone.`}
           confirmText="Delete"
           cancelText="Cancel"
-          onConfirm={() => deleteConfirm.businessName && handleDelete(deleteConfirm.businessName)}
+          onClose={() => setDeleteConfirm({ isOpen: false, businessName: null })}
+          onConfirm={() => deleteConfirm.businessName ? handleDelete(deleteConfirm.businessName) : Promise.resolve()}
           onCancel={() => setDeleteConfirm({ isOpen: false, businessName: null })}
           type="danger"
         />

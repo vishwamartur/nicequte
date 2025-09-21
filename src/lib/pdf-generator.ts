@@ -9,7 +9,7 @@ export interface PDFOptions {
 }
 
 // Helper function to sanitize CSS for html2canvas compatibility
-function sanitizeElementForPDF(element: HTMLElement): HTMLElement {
+function sanitizeElementForPDF(element: HTMLElement): { element: HTMLElement; container: HTMLElement } {
   const clonedElement = element.cloneNode(true) as HTMLElement
 
   // Create a temporary container
@@ -137,9 +137,7 @@ export async function generatePDFFromElement(
       title: filename.replace('.pdf', ''),
       subject: 'Quotation Document',
       author: 'InvGen Quotation Generator',
-      creator: 'InvGen',
-      producer: 'InvGen',
-      creationDate: new Date()
+      creator: 'InvGen'
     })
 
     // Add image to PDF

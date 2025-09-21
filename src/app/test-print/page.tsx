@@ -15,6 +15,7 @@ interface TestResult {
 }
 
 export default function TestPrintPage() {
+  const { toasts, removeToast } = useToast()
   const [testResults, setTestResults] = useState<TestResult[]>([])
   const [isRunning, setIsRunning] = useState(false)
   const [sampleQuotation, setSampleQuotation] = useState<any>(null)
@@ -352,7 +353,7 @@ export default function TestPrintPage() {
         </div>
       </div>
       
-      <ToastContainer />
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </Layout>
   )
 }

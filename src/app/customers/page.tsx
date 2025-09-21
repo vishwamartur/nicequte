@@ -291,7 +291,8 @@ export default function CustomersPage() {
           message={`Are you sure you want to delete "${deleteConfirm.customer?.name}"? This action cannot be undone.`}
           confirmText="Delete"
           cancelText="Cancel"
-          onConfirm={() => deleteConfirm.customer && handleDelete(deleteConfirm.customer)}
+          onClose={() => setDeleteConfirm({ isOpen: false, customer: null })}
+          onConfirm={() => deleteConfirm.customer ? handleDelete(deleteConfirm.customer) : Promise.resolve()}
           onCancel={() => setDeleteConfirm({ isOpen: false, customer: null })}
           type="danger"
         />

@@ -204,7 +204,7 @@ export default function Dashboard() {
               <div>
                 <h3 className="font-medium text-gray-900">Initialize Sample Data</h3>
                 <p className="text-sm text-gray-600">
-                  Click the "Seed Database" button above to populate your catalog with sample plumbing and electrical products.
+                  Click the &quot;Seed Database&quot; button above to populate your catalog with sample plumbing and electrical products.
                 </p>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function Dashboard() {
               <div>
                 <h3 className="font-medium text-gray-900">Create Your First Quotation</h3>
                 <p className="text-sm text-gray-600">
-                  Use the "Create New Quotation" action to generate your first professional quotation with automatic GST calculations.
+                  Use the &quot;Create New Quotation&quot; action to generate your first professional quotation with automatic GST calculations.
                 </p>
               </div>
             </div>

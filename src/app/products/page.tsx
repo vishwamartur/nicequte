@@ -25,6 +25,8 @@ interface Product {
   unitPrice: number
   unit: string
   sku: string | null
+  categoryId: string
+  isActive: boolean
   category: Category
 }
 
@@ -166,7 +168,7 @@ export default function ProductsPage() {
       setEditingProduct(null)
     } catch (error) {
       console.error('Error saving product:', error)
-      showError('Error', error.message || 'Failed to save product')
+      showError('Error', (error instanceof Error ? error.message : 'Failed to save product'))
       throw error
     }
   }
@@ -215,7 +217,7 @@ export default function ProductsPage() {
       setDeletingProduct(null)
     } catch (error) {
       console.error('Error deleting product:', error)
-      showError('Error', error.message || 'Failed to delete product')
+      showError('Error', (error instanceof Error ? error.message : 'Failed to delete product'))
     } finally {
       setDeleteLoading(false)
     }

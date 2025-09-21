@@ -27,6 +27,7 @@ interface QuotationItem {
   unitPrice: number
   lineTotal: number
   description: string | null
+  isCustom: boolean
   product: {
     id: string
     name: string
@@ -73,6 +74,14 @@ interface Quotation {
   updatedAt: string
   customer: Customer
   company: Company
+  businessName?: {
+    id: string
+    name: string
+    address: string | null
+    phone: string | null
+    email: string | null
+    gstNumber: string | null
+  } | null
   items: QuotationItem[]
 }
 
@@ -140,7 +149,7 @@ export default function QuotationDetailPage() {
       showSuccess('Status Updated', `Quotation status changed to ${newStatus}`)
     } catch (error) {
       console.error('Error updating status:', error)
-      showError('Error', error.message || 'Failed to update status')
+      showError('Error', (error instanceof Error ? error.message : 'Failed to update status'))
     } finally {
       setStatusLoading(false)
     }
@@ -384,15 +393,16 @@ export default function QuotationDetailPage() {
             },
             quantity: item.quantity,
             unitPrice: item.unitPrice,
-            lineTotal: item.lineTotal
+            lineTotal: item.lineTotal,
+            isCustom: item.isCustom || false
           }))}
           subtotal={quotation.subtotal}
           gstRate={quotation.gstRate}
           gstAmount={quotation.gstAmount}
           totalAmount={quotation.totalAmount}
-          title={quotation.title}
-          description={quotation.description}
-          notes={quotation.notes}
+          title={quotation.title || undefined}
+          description={quotation.description || undefined}
+          notes={quotation.notes || undefined}
           onDownloadPDF={handleDownloadPDF}
           onPrint={handlePrint}
         />

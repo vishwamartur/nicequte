@@ -235,7 +235,7 @@ export default function ProductForm({ product, isOpen, onClose, onSave, title }:
               </label>
               <input
                 type="text"
-                value={formData.sku}
+                value={formData.sku || ''}
                 onChange={(e) => handleInputChange('sku', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter SKU code"
@@ -339,7 +339,7 @@ export default function ProductForm({ product, isOpen, onClose, onSave, title }:
               Description
             </label>
             <textarea
-              value={formData.description}
+              value={formData.description || ''}
               onChange={(e) => handleInputChange('description', e.target.value)}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"

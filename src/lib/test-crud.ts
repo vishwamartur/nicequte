@@ -122,7 +122,7 @@ export async function testProductCRUD() {
 
   } catch (error) {
     console.error('❌ CRUD test failed:', error)
-    return { success: false, error: error.message }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
 
@@ -206,7 +206,7 @@ export async function testValidation() {
 
   } catch (error) {
     console.error('❌ Validation test failed:', error)
-    return { success: false, error: error.message }
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
 

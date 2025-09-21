@@ -107,8 +107,8 @@ async function verifyMigration() {
       console.log(`      - Items relation: ${quotationWithRelations.items.length} items`)
       if (quotationWithRelations.items.length > 0) {
         const item = quotationWithRelations.items[0]
-        console.log(`      - Product relation: ${item.product.name}`)
-        console.log(`      - Category relation: ${item.product.category.name}`)
+        console.log(`      - Product relation: ${item.product?.name || 'N/A'}`)
+        console.log(`      - Category relation: ${item.product?.category?.name || 'N/A'}`)
       }
     }
     console.log()

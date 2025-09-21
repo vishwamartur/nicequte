@@ -270,7 +270,7 @@ export default function EditQuotationPage() {
       router.push(`/quotations/${params.id}`)
     } catch (error) {
       console.error('Error updating quotation:', error)
-      showError('Error', error.message || 'Failed to update quotation')
+      showError('Error', (error instanceof Error ? error.message : 'Failed to update quotation'))
     } finally {
       setSaving(false)
     }

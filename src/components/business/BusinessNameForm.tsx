@@ -19,7 +19,7 @@ interface BusinessNameFormProps {
   businessName?: BusinessName
   isOpen: boolean
   onClose: () => void
-  onSave: (businessName: Omit<BusinessName, 'id' | 'isActive'>) => Promise<void>
+  onSave: (businessName: Omit<BusinessName, 'id' | 'isActive' | 'createdAt' | 'updatedAt'>) => Promise<void>
 }
 
 export default function BusinessNameForm({

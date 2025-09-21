@@ -187,7 +187,7 @@ export default function QuotationsPage() {
       loadQuotations(currentPage)
     } catch (error) {
       console.error('Error deleting quotation:', error)
-      showError('Error', error.message || 'Failed to delete quotation')
+      showError('Error', (error instanceof Error ? error.message : 'Failed to delete quotation'))
     }
   }
 

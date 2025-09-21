@@ -6,6 +6,7 @@ interface ConfirmDialogProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => Promise<void> | void
+  onCancel?: () => void
   title: string
   message: string
   confirmText?: string
@@ -18,6 +19,7 @@ export default function ConfirmDialog({
   isOpen,
   onClose,
   onConfirm,
+  onCancel,
   title,
   message,
   confirmText = 'Confirm',
@@ -92,7 +94,7 @@ export default function ConfirmDialog({
         <div className="flex justify-end space-x-3 p-6 border-t border-gray-200">
           <button
             type="button"
-            onClick={onClose}
+            onClick={onCancel || onClose}
             disabled={loading}
             className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
