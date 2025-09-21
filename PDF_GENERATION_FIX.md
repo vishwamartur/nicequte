@@ -65,14 +65,20 @@ The fix addresses the PDF generation error through multiple approaches:
 **Changes Made:**
 - Import PDF-compatible styles globally
 
-### 6. `src/app/test-pdf/page.tsx` (New File)
-**Purpose:** Test suite for PDF generation functionality
+### 6. `src/app/test-pdf/page.tsx` (New File) - DEVELOPMENT ONLY
+**Purpose:** Test suite for PDF generation functionality (development and debugging only)
+
+**Important:** This test suite is completely separate from the normal user workflow.
+Regular users click "Download PDF" on quotation pages, which directly calls
+`generateQuotationPDF()` without any test suite involvement.
 
 **Features:**
 - Test basic PDF generation
 - Test color compatibility
 - Test CSS sanitization
 - Test fallback methods
+- Development warning banner
+- Not linked in main navigation
 
 ## Technical Details
 
@@ -127,17 +133,23 @@ When primary PDF generation fails:
 
 ## Testing
 
-### Test Suite (`/test-pdf`)
+### Normal User Workflow (Production)
+**For regular PDF generation, users simply:**
+1. Navigate to any quotation detail page
+2. Click "Download PDF" button
+3. PDF generates and downloads automatically
+4. No test suite involvement - direct PDF generation
+
+### Development Test Suite (`/test-pdf`) - DEVELOPMENT ONLY
+**Important:** This test suite is completely separate from normal user workflow.
+It's only for development and debugging purposes.
+
 - **Basic PDF Generation**: Tests core functionality
 - **Color Compatibility**: Tests color function handling
 - **CSS Sanitization**: Tests CSS cleanup process
 - **Fallback Method**: Tests alternative generation method
-
-### Manual Testing
-1. Navigate to any quotation detail page
-2. Click "Download PDF" button
-3. Verify PDF generates without errors
-4. Check PDF content for proper formatting and colors
+- **Access**: Direct URL only (not linked in navigation)
+- **Warning Banner**: Clearly marked as development tool
 
 ## Browser Compatibility
 

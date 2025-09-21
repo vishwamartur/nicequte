@@ -235,6 +235,15 @@ export function printElement(elementId: string): void {
   }
 }
 
+/**
+ * Generate PDF for quotations - MAIN USER FUNCTION
+ *
+ * This is the primary function used by the quotation detail page when users
+ * click "Download PDF". It directly generates the PDF without any test suite
+ * involvement and includes fallback methods for reliability.
+ *
+ * @param quotationData - The quotation data to generate PDF for
+ */
 export async function generateQuotationPDF(quotationData: any): Promise<void> {
   const filename = `quotation-${quotationData.quotationNumber}.pdf`
 

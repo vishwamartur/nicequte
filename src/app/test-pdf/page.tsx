@@ -1,3 +1,15 @@
+/**
+ * PDF Generation Test Suite - DEVELOPMENT ONLY
+ *
+ * This page is for development and debugging purposes only.
+ * It should NOT be linked in the main navigation or user interface.
+ *
+ * Regular users should use the "Download PDF" button on quotation pages,
+ * which directly calls generateQuotationPDF() without any test suite involvement.
+ *
+ * Access: http://localhost:3001/test-pdf (development only)
+ */
+
 'use client'
 
 import { useState } from 'react'
@@ -129,6 +141,18 @@ export default function TestPDFPage() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto p-6">
+        {/* Development Warning */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+          <div className="flex items-center space-x-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <h2 className="text-lg font-semibold text-yellow-800">Development Tool Only</h2>
+          </div>
+          <p className="text-yellow-700 mt-2">
+            This test suite is for development and debugging purposes only. Regular users should use the
+            "Download PDF" button on quotation pages for normal PDF generation.
+          </p>
+        </div>
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">PDF Generation Test Suite</h1>
           <p className="text-gray-600">
