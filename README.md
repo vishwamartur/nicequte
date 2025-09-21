@@ -33,17 +33,24 @@ A comprehensive web application for generating professional quotations and estim
 - 30-day validity period (configurable)
 
 ### 🗄️ **Data Management**
-- PostgreSQL database with Prisma ORM
+- MongoDB Atlas cloud database with Prisma ORM
 - Customer information management
 - Quotation history and status tracking
 - Product catalog management
 - Company settings and configuration
 
+### 🔧 **Advanced Features**
+- **Search & Filtering**: Advanced search across quotations, products, and customers
+- **Bulk Operations**: Multi-select functionality for batch operations
+- **Status Management**: Quotation workflow (Draft, Sent, Accepted, Rejected, Expired)
+- **Print Optimization**: CSS print styles for professional output
+- **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
+
 ## Technology Stack
 
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **Styling**: Tailwind CSS 4
-- **Database**: PostgreSQL with Prisma ORM
+- **Database**: MongoDB Atlas with Prisma ORM
 - **PDF Generation**: jsPDF with html2canvas
 - **Icons**: Lucide React
 - **Form Handling**: React Hook Form with Zod validation
@@ -54,15 +61,15 @@ A comprehensive web application for generating professional quotations and estim
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL database
+- MongoDB Atlas account (or local MongoDB)
 - npm or yarn package manager
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd invgen
+   git clone https://github.com/vishwamartur/nicequte.git
+   cd nicequte
    ```
 
 2. **Install dependencies**
@@ -71,13 +78,9 @@ A comprehensive web application for generating professional quotations and estim
    ```
 
 3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-
-   Update the `.env` file with your database connection:
+   Create a `.env` file in the root directory:
    ```env
-   DATABASE_URL=postgresql://username:password@localhost:5432/invgen
+   DATABASE_URL="mongodb+srv://root:root@vishwa.hgb4t.mongodb.net/invgen?retryWrites=true&w=majority&appName=vishwa"
    ```
 
 4. **Set up the database**
@@ -85,15 +88,14 @@ A comprehensive web application for generating professional quotations and estim
    # Generate Prisma client
    npx prisma generate
 
-   # Run database migrations
-   npx prisma migrate dev --name init
+   # Push schema to MongoDB
+   npx prisma db push
    ```
 
 5. **Seed the database with sample data**
    ```bash
-   npm run dev
+   npx tsx prisma/seed-mongodb.ts
    ```
-   Then visit the application and click "Seed Database" on the dashboard.
 
 6. **Start the development server**
    ```bash
@@ -106,8 +108,9 @@ A comprehensive web application for generating professional quotations and estim
 ## Usage Guide
 
 ### 1. **Initialize Sample Data**
-- Visit the dashboard and click "Seed Database" to populate with sample products
-- This adds plumbing and electrical materials with realistic pricing
+- Sample data is automatically seeded during installation
+- Includes plumbing and electrical materials with realistic pricing
+- Contains 1 company, 2 categories, 10 products, 1 customer, and 1 sample quotation
 
 ### 2. **Browse Products**
 - Navigate to "Products" to view the catalog
