@@ -489,7 +489,7 @@ export default function NewQuotationPage() {
             <div className="space-y-4">
               {quotationItems.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  <p>No products added yet. Click "Add Product" to get started.</p>
+                  <p>No products added yet. Click &quot;Add Product&quot; to get started.</p>
                 </div>
               ) : (
                 quotationItems.map((item) => (
