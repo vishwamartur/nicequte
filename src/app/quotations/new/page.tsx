@@ -34,6 +34,18 @@ interface CustomerInfo {
   gstNumber: string
 }
 
+interface BusinessName {
+  id: string
+  name: string
+  description: string | null
+  address: string | null
+  phone: string | null
+  email: string | null
+  gstNumber: string | null
+  isDefault: boolean
+  isActive: boolean
+}
+
 export default function NewQuotationPage() {
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
@@ -42,9 +54,11 @@ export default function NewQuotationPage() {
     address: '',
     gstNumber: ''
   })
-  
+
   const [quotationItems, setQuotationItems] = useState<QuotationItem[]>([])
   const [products, setProducts] = useState<Product[]>([])
+  const [businessNames, setBusinessNames] = useState<BusinessName[]>([])
+  const [selectedBusinessNameId, setSelectedBusinessNameId] = useState<string>('')
   const [searchTerm, setSearchTerm] = useState('')
   const [showProductSearch, setShowProductSearch] = useState(false)
   const [gstRate, setGstRate] = useState(18)
@@ -60,7 +74,7 @@ export default function NewQuotationPage() {
         limit: '50',
         ...(search && { search })
       })
-      
+
       const response = await fetch(`/api/products?${params}`)
       const data = await response.json()
       setProducts(data.products)
@@ -69,8 +83,26 @@ export default function NewQuotationPage() {
     }
   }
 
+  // Load business names
+  const loadBusinessNames = async () => {
+    try {
+      const response = await fetch('/api/business-names')
+      const data = await response.json()
+      setBusinessNames(data)
+
+      // Set default business name if available
+      const defaultBusinessName = data.find((bn: BusinessName) => bn.isDefault)
+      if (defaultBusinessName) {
+        setSelectedBusinessNameId(defaultBusinessName.id)
+      }
+    } catch (error) {
+      console.error('Error loading business names:', error)
+    }
+  }
+
   useEffect(() => {
     loadProducts()
+    loadBusinessNames()
   }, [])
 
   useEffect(() => {
@@ -130,8 +162,8 @@ export default function NewQuotationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!customerInfo.name || quotationItems.length === 0) {
-      alert('Please fill in customer name and add at least one product.')
+    if (!customerInfo.name || quotationItems.length === 0 || !selectedBusinessNameId) {
+      alert('Please fill in customer name, select a business name, and add at least one product.')
       return
     }
 
@@ -141,6 +173,7 @@ export default function NewQuotationPage() {
 
       const quotationData = {
         customerInfo,
+        businessNameId: selectedBusinessNameId,
         items: quotationItems,
         subtotal,
         gstAmount,
@@ -251,6 +284,68 @@ export default function NewQuotationPage() {
                 placeholder="Brief description of the work to be done..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+            </div>
+          </div>
+
+          {/* Business Name Selection */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Business Information</h2>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Business Name *
+              </label>
+              <select
+                required
+                value={selectedBusinessNameId}
+                onChange={(e) => setSelectedBusinessNameId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Select a business name...</option>
+                {businessNames.map((businessName) => (
+                  <option key={businessName.id} value={businessName.id}>
+                    {businessName.name}
+                    {businessName.isDefault ? ' (Default)' : ''}
+                  </option>
+                ))}
+              </select>
+              {businessNames.length === 0 && (
+                <p className="text-sm text-gray-500 mt-2">
+                  No business names available.
+                  <a href="/business-names" className="text-blue-600 hover:text-blue-800 ml-1">
+                    Create one here
+                  </a>
+                </p>
+              )}
+              {selectedBusinessNameId && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  {(() => {
+                    const selectedBusiness = businessNames.find(bn => bn.id === selectedBusinessNameId)
+                    if (!selectedBusiness) return null
+                    return (
+                      <div className="text-sm text-gray-600">
+                        <p className="font-medium text-gray-900">{selectedBusiness.name}</p>
+                        {selectedBusiness.description && (
+                          <p className="mt-1">{selectedBusiness.description}</p>
+                        )}
+                        {selectedBusiness.address && (
+                          <p className="mt-1">📍 {selectedBusiness.address}</p>
+                        )}
+                        <div className="flex space-x-4 mt-1">
+                          {selectedBusiness.phone && (
+                            <span>📞 {selectedBusiness.phone}</span>
+                          )}
+                          {selectedBusiness.email && (
+                            <span>✉️ {selectedBusiness.email}</span>
+                          )}
+                        </div>
+                        {selectedBusiness.gstNumber && (
+                          <p className="mt-1">GST: {selectedBusiness.gstNumber}</p>
+                        )}
+                      </div>
+                    )
+                  })()}
+                </div>
+              )}
             </div>
           </div>
 

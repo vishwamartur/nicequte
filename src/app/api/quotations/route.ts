@@ -105,6 +105,16 @@ export async function GET(request: NextRequest) {
               gstNumber: true,
             }
           },
+          businessName: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+              phone: true,
+              email: true,
+              gstNumber: true,
+            }
+          },
           _count: {
             select: { items: true }
           }
@@ -158,6 +168,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       customerInfo,
+      businessNameId,
       items,
       subtotal,
       gstAmount,
@@ -242,6 +253,7 @@ export async function POST(request: NextRequest) {
         quotationNumber,
         customerId: customer.id,
         companyId: company.id,
+        businessNameId: businessNameId || null,
         title: title || null,
         description: description || null,
         subtotal: parseFloat(subtotal.toString()),
@@ -263,6 +275,7 @@ export async function POST(request: NextRequest) {
       include: {
         customer: true,
         company: true,
+        businessName: true,
         items: {
           include: {
             product: {

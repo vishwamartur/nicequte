@@ -26,9 +26,18 @@ interface CustomerInfo {
   gstNumber: string
 }
 
+interface BusinessInfo {
+  name: string
+  address?: string | null
+  phone?: string | null
+  email?: string | null
+  gstNumber?: string | null
+}
+
 interface QuotationPreviewProps {
   quotationNumber: string
   customerInfo: CustomerInfo
+  businessInfo?: BusinessInfo
   items: QuotationItem[]
   subtotal: number
   gstRate: number
@@ -44,6 +53,7 @@ interface QuotationPreviewProps {
 export default function QuotationPreview({
   quotationNumber,
   customerInfo,
+  businessInfo,
   items,
   subtotal,
   gstRate,
@@ -61,7 +71,8 @@ export default function QuotationPreview({
 
   const gstBreakdown = calculateGSTBreakdown(subtotal, gstRate)
 
-  const companyInfo = {
+  // Use business info if provided, otherwise fallback to default company info
+  const companyInfo = businessInfo || {
     name: 'Professional Services Ltd.',
     address: '123 Business Street, City, State 12345',
     phone: '+91 98765 43210',

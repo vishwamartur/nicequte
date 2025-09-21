@@ -28,6 +28,25 @@ model Company {
   @@map("companies")
 }
 
+// Business names for quick selection in quotations
+model BusinessName {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?  // Optional description for the business
+  address     String?
+  phone       String?
+  email       String?
+  gstNumber   String?
+  isDefault   Boolean  @default(false) // Mark as default business name
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  quotations  Quotation[]
+
+  @@map("business_names")
+}
+
 // Product categories (Plumbing, Electrical, etc.)
 model Category {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -80,25 +99,27 @@ model Customer {
 
 // Main quotation/estimate
 model Quotation {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  quotationNumber String @unique
-  customerId    String   @db.ObjectId
-  companyId     String   @db.ObjectId
-  title         String?
-  description   String?
-  subtotal      Float    @default(0)
-  gstAmount     Float    @default(0)
-  gstRate       Float    @default(18.0)
-  totalAmount   Float    @default(0)
-  status        QuotationStatus @default(DRAFT)
-  validUntil    DateTime?
-  notes         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  quotationNumber String   @unique
+  customerId      String   @db.ObjectId
+  companyId       String   @db.ObjectId
+  businessNameId  String?  @db.ObjectId // Optional reference to business name
+  title           String?
+  description     String?
+  subtotal        Float    @default(0)
+  gstAmount       Float    @default(0)
+  gstRate         Float    @default(18.0)
+  totalAmount     Float    @default(0)
+  status          QuotationStatus @default(DRAFT)
+  validUntil      DateTime?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  customer      Customer @relation(fields: [customerId], references: [id])
-  company       Company  @relation(fields: [companyId], references: [id])
-  items         QuotationItem[]
+  customer        Customer     @relation(fields: [customerId], references: [id])
+  company         Company      @relation(fields: [companyId], references: [id])
+  businessName    BusinessName? @relation(fields: [businessNameId], references: [id])
+  items           QuotationItem[]
 
   @@map("quotations")
 }

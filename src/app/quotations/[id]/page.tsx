@@ -367,6 +367,13 @@ export default function QuotationDetailPage() {
             address: quotation.customer.address || '',
             gstNumber: quotation.customer.gstNumber || ''
           }}
+          businessInfo={quotation.businessName ? {
+            name: quotation.businessName.name,
+            address: quotation.businessName.address,
+            phone: quotation.businessName.phone,
+            email: quotation.businessName.email,
+            gstNumber: quotation.businessName.gstNumber
+          } : undefined}
           items={quotation.items.map(item => ({
             id: item.id,
             product: {

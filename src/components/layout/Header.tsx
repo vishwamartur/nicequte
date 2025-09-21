@@ -3,13 +3,14 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { 
-  FileText, 
-  Package, 
-  Settings, 
+import {
+  FileText,
+  Package,
+  Settings,
   Calculator,
   Menu,
-  X
+  X,
+  Building
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -18,6 +19,7 @@ const navigation = [
   { name: 'New Quotation', href: '/quotations/new', icon: FileText },
   { name: 'Products', href: '/products', icon: Package },
   { name: 'Quotations', href: '/quotations', icon: FileText },
+  { name: 'Business Names', href: '/business-names', icon: Building },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 

@@ -12,6 +12,7 @@ export async function GET(
       include: {
         customer: true,
         company: true,
+        businessName: true,
         items: {
           include: {
             product: {
