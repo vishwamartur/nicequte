@@ -3,11 +3,12 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const quotation = await prisma.quotation.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         customer: true,
         company: true,
@@ -42,9 +43,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { customerInfo, items, subtotal, gstAmount, gstRate, totalAmount, title, description, notes, validUntil } = body
 
@@ -58,7 +60,7 @@ export async function PUT(
 
     // Check if quotation exists
     const existingQuotation = await prisma.quotation.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { items: true }
     })
 
@@ -105,7 +107,7 @@ export async function PUT(
 
       // Delete existing quotation items
       await tx.quotationItem.deleteMany({
-        where: { quotationId: params.id }
+        where: { quotationId: id }
       })
 
       // Create new quotation items
@@ -113,7 +115,7 @@ export async function PUT(
         items.map(async (item: any) => {
           return tx.quotationItem.create({
             data: {
-              quotationId: params.id,
+              quotationId: id,
               productId: item.product.id,
               quantity: item.quantity,
               unitPrice: item.unitPrice,
@@ -126,7 +128,7 @@ export async function PUT(
 
       // Update quotation
       const updatedQuotation = await tx.quotation.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           customerId: customer.id,
           title: title || null,
@@ -172,11 +174,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const quotation = await prisma.quotation.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!quotation) {
@@ -187,7 +190,7 @@ export async function DELETE(
     }
 
     await prisma.quotation.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ message: 'Quotation deleted successfully' })

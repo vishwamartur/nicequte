@@ -3,11 +3,12 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         category: true,
       },
@@ -32,9 +33,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await request.json()
     const {
       name,
@@ -49,7 +51,7 @@ export async function PUT(
 
     // Check if product exists
     const existingProduct = await prisma.product.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingProduct) {
@@ -135,7 +137,7 @@ export async function PUT(
     if (isActive !== undefined) updateData.isActive = Boolean(isActive)
 
     const updatedProduct = await prisma.product.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         category: true,
@@ -163,15 +165,16 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const force = searchParams.get('force') === 'true'
 
     // Check if product exists
     const existingProduct = await prisma.product.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingProduct) {
@@ -183,7 +186,7 @@ export async function DELETE(
 
     // Check if product is used in any quotations
     const quotationItemsCount = await prisma.quotationItem.count({
-      where: { productId: params.id }
+      where: { productId: id }
     })
 
     if (quotationItemsCount > 0 && !force) {
@@ -200,7 +203,7 @@ export async function DELETE(
     if (force && quotationItemsCount > 0) {
       // Soft delete - mark as inactive
       const updatedProduct = await prisma.product.update({
-        where: { id: params.id },
+        where: { id },
         data: { isActive: false },
         include: {
           category: true,
@@ -215,7 +218,7 @@ export async function DELETE(
     } else {
       // Hard delete
       await prisma.product.delete({
-        where: { id: params.id }
+        where: { id }
       })
 
       return NextResponse.json({
