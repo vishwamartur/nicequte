@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { RefreshCw, AlertTriangle, Wifi, WifiOff } from 'lucide-react'
 
 interface ErrorRecoveryProps {
@@ -81,7 +81,7 @@ interface NetworkStatusProps {
 export function NetworkStatus({ className = '' }: NetworkStatusProps) {
   const [isOnline, setIsOnline] = useState(true) // Default to online for SSR
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Set initial online status
     if (typeof navigator !== 'undefined') {
       setIsOnline(navigator.onLine)
