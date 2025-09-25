@@ -84,8 +84,9 @@ export function useConcurrentAsyncState<T extends Record<string, any>>(initialSt
     key: K,
     asyncOperation: () => Promise<T[K]>
   ) => {
-    const currentOperationId = ++((operationIdsRef.current[key as string] as number) || 0)
-    operationIdsRef.current[key as string] = currentOperationId
+    const keyStr = key as string
+    const currentOperationId = ((operationIdsRef.current[keyStr] as number) || 0) + 1
+    operationIdsRef.current[keyStr] = currentOperationId
     
     setLoadingStates(prev => ({ ...prev, [key]: true }))
     setErrors(prev => ({ ...prev, [key]: null }))
@@ -119,7 +120,7 @@ export function useConcurrentAsyncState<T extends Record<string, any>>(initialSt
 
   const resetAll = useCallback(() => {
     Object.keys(operationIdsRef.current).forEach(key => {
-      operationIdsRef.current[key]++
+      operationIdsRef.current[key] = (operationIdsRef.current[key] || 0) + 1
     })
     setSafeState(initialState)
     setLoadingStates({})
