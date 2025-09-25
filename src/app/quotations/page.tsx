@@ -100,20 +100,8 @@ export default function QuotationsPage() {
     totalValue: 0
   })
 
-  useEffect(() => {
-    loadQuotations()
-  }, [loadQuotations])
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setCurrentPage(1)
-      loadQuotations(1)
-    }, 300)
-
-    return () => clearTimeout(timeoutId)
-  }, [searchTerm, statusFilter, sortBy, sortOrder, dateFrom, dateTo, minAmount, maxAmount, loadQuotations])
-
   // Enhanced quotations loading with proper error handling
+  // Moved above useEffect hooks to avoid Temporal Dead Zone error
   const {
     execute: loadQuotations,
     isLoading: quotationsLoading,
@@ -145,7 +133,18 @@ export default function QuotationsPage() {
     onError: (error) => showError('Error', `Failed to load quotations: ${error}`)
   })
 
-  // Use quotationsLoading directly instead of creating a new loading variable
+  useEffect(() => {
+    loadQuotations()
+  }, [loadQuotations])
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setCurrentPage(1)
+      loadQuotations(1)
+    }, 300)
+
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm, statusFilter, sortBy, sortOrder, dateFrom, dateTo, minAmount, maxAmount, loadQuotations])
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
