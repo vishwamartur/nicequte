@@ -79,18 +79,25 @@ interface NetworkStatusProps {
 }
 
 export function NetworkStatus({ className = '' }: NetworkStatusProps) {
-  const [isOnline, setIsOnline] = useState(navigator.onLine)
+  const [isOnline, setIsOnline] = useState(true) // Default to online for SSR
 
   React.useEffect(() => {
+    // Set initial online status
+    if (typeof navigator !== 'undefined') {
+      setIsOnline(navigator.onLine)
+    }
+
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
 
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', handleOnline)
+      window.addEventListener('offline', handleOffline)
 
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+      return () => {
+        window.removeEventListener('online', handleOnline)
+        window.removeEventListener('offline', handleOffline)
+      }
     }
   }, [])
 

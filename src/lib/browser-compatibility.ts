@@ -24,12 +24,17 @@ class BrowserCompatibility {
   private compatibilityChecks: CompatibilityCheck[] = []
 
   constructor() {
-    this.detectBrowser()
-    this.checkCompatibility()
-    this.applyPolyfills()
+    // Only initialize in browser environment
+    if (typeof window !== 'undefined') {
+      this.detectBrowser()
+      this.checkCompatibility()
+      this.applyPolyfills()
+    }
   }
 
   private detectBrowser(): void {
+    if (typeof navigator === 'undefined') return
+
     const userAgent = navigator.userAgent
     let name = 'Unknown'
     let version = 'Unknown'
@@ -108,13 +113,13 @@ class BrowserCompatibility {
       },
       {
         feature: 'CSS Grid',
-        check: () => CSS.supports('display', 'grid'),
+        check: () => typeof CSS !== 'undefined' && CSS.supports && CSS.supports('display', 'grid'),
         polyfillAvailable: false,
         critical: false
       },
       {
         feature: 'CSS Flexbox',
-        check: () => CSS.supports('display', 'flex'),
+        check: () => typeof CSS !== 'undefined' && CSS.supports && CSS.supports('display', 'flex'),
         polyfillAvailable: false,
         critical: true
       },
@@ -122,6 +127,7 @@ class BrowserCompatibility {
         feature: 'localStorage',
         check: () => {
           try {
+            if (typeof localStorage === 'undefined') return false
             const test = 'test'
             localStorage.setItem(test, test)
             localStorage.removeItem(test)
@@ -137,6 +143,7 @@ class BrowserCompatibility {
         feature: 'sessionStorage',
         check: () => {
           try {
+            if (typeof sessionStorage === 'undefined') return false
             const test = 'test'
             sessionStorage.setItem(test, test)
             sessionStorage.removeItem(test)

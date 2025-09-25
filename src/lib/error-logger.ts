@@ -26,15 +26,20 @@ export interface ErrorReport {
 class ErrorLogger {
   private sessionId: string
   private errorQueue: ErrorReport[] = []
-  private isOnline: boolean = navigator.onLine
+  private isOnline: boolean = true
   private maxQueueSize: number = 100
   private flushInterval: number = 30000 // 30 seconds
 
   constructor() {
     this.sessionId = this.generateSessionId()
-    this.setupGlobalErrorHandlers()
-    this.setupNetworkMonitoring()
-    this.startPeriodicFlush()
+
+    // Only initialize in browser environment
+    if (typeof window !== 'undefined') {
+      this.isOnline = navigator.onLine
+      this.setupGlobalErrorHandlers()
+      this.setupNetworkMonitoring()
+      this.startPeriodicFlush()
+    }
   }
 
   private generateSessionId(): string {
@@ -51,6 +56,8 @@ class ErrorLogger {
   }
 
   private setupGlobalErrorHandlers(): void {
+    if (typeof window === 'undefined') return
+
     // Handle uncaught JavaScript errors
     window.addEventListener('error', (event) => {
       this.logError({
@@ -89,6 +96,8 @@ class ErrorLogger {
   }
 
   private setupNetworkMonitoring(): void {
+    if (typeof window === 'undefined') return
+
     // Monitor online/offline status
     window.addEventListener('online', () => {
       this.isOnline = true
@@ -120,8 +129,8 @@ class ErrorLogger {
   private getContext(): ErrorContext {
     return {
       sessionId: this.sessionId,
-      userAgent: navigator.userAgent,
-      url: window.location.href,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
+      url: typeof window !== 'undefined' ? window.location.href : 'Unknown',
       timestamp: new Date().toISOString()
     }
   }
@@ -232,10 +241,12 @@ class ErrorLogger {
         //   body: JSON.stringify({ errors: errorsToSend })
         // })
         
-        // Store in localStorage as fallback
-        const existingErrors = JSON.parse(localStorage.getItem('error_logs') || '[]')
-        const allErrors = [...existingErrors, ...errorsToSend].slice(-500) // Keep last 500 errors
-        localStorage.setItem('error_logs', JSON.stringify(allErrors))
+        // Store in localStorage as fallback (only in browser)
+        if (typeof localStorage !== 'undefined') {
+          const existingErrors = JSON.parse(localStorage.getItem('error_logs') || '[]')
+          const allErrors = [...existingErrors, ...errorsToSend].slice(-500) // Keep last 500 errors
+          localStorage.setItem('error_logs', JSON.stringify(allErrors))
+        }
       }
 
       console.log(`📊 Flushed ${errorsToSend.length} errors to logging service`)
@@ -247,6 +258,10 @@ class ErrorLogger {
   }
 
   public getErrorStats(): { total: number; byType: Record<string, number>; bySeverity: Record<string, number> } {
+    if (typeof localStorage === 'undefined') {
+      return { total: 0, byType: {}, bySeverity: {} }
+    }
+
     const logs = JSON.parse(localStorage.getItem('error_logs') || '[]') as ErrorReport[]
     
     const stats = {
@@ -264,7 +279,9 @@ class ErrorLogger {
   }
 
   public clearErrorLogs(): void {
-    localStorage.removeItem('error_logs')
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('error_logs')
+    }
     this.errorQueue = []
   }
 }

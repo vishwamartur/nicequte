@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import { initBrowserCompatibility } from '@/lib/browser-compatibility'
-import { errorLogger } from '@/lib/error-logger'
 
 /**
  * Client-side initialization component
@@ -10,15 +8,26 @@ import { errorLogger } from '@/lib/error-logger'
  */
 export default function ClientInitializer() {
   useEffect(() => {
-    // Initialize browser compatibility checks
-    initBrowserCompatibility()
+    // Dynamic imports to avoid SSR issues
+    const initializeClientSide = async () => {
+      try {
+        // Initialize browser compatibility checks
+        const { initBrowserCompatibility } = await import('@/lib/browser-compatibility')
+        initBrowserCompatibility()
 
-    // Log application startup
-    errorLogger.logUserAction('app_startup', 'application', {
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      url: window.location.href
-    })
+        // Initialize error logger
+        const { errorLogger } = await import('@/lib/error-logger')
+        errorLogger.logUserAction('app_startup', 'application', {
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          url: window.location.href
+        })
+      } catch (error) {
+        console.error('Failed to initialize client-side features:', error)
+      }
+    }
+
+    initializeClientSide()
 
     // Performance monitoring
     if ('performance' in window && 'getEntriesByType' in performance) {
