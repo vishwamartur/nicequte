@@ -24,6 +24,8 @@ import {
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { generateQuotationPDF, printElement } from '@/lib/pdf-generator'
+import { apiClient } from '@/lib/api-client'
+import { useAsyncCallback, useDebouncedAsyncOperation } from '@/hooks/useAsyncOperation'
 import Link from 'next/link'
 
 interface Quotation {
@@ -69,7 +71,6 @@ export default function QuotationsPage() {
   const { toasts, removeToast, showSuccess, showError } = useToast()
 
   const [quotations, setQuotations] = useState<Quotation[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState('createdAt')
@@ -99,9 +100,42 @@ export default function QuotationsPage() {
     totalValue: 0
   })
 
+  // Enhanced quotations loading with proper error handling
+  // Moved above useEffect hooks to avoid Temporal Dead Zone error
+  const {
+    execute: loadQuotations,
+    isLoading: quotationsLoading,
+    error: quotationsError
+  } = useAsyncCallback(async (page = 1) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: '20',
+      sortBy,
+      sortOrder,
+      ...(searchTerm && { search: searchTerm }),
+      ...(statusFilter !== 'all' && { status: statusFilter }),
+      ...(dateFrom && { dateFrom }),
+      ...(dateTo && { dateTo }),
+      ...(minAmount && { minAmount }),
+      ...(maxAmount && { maxAmount })
+    })
+
+    const response = await apiClient.get(`/api/quotations?${params}`)
+    if (response.success && response.data) {
+      setQuotations(response.data.quotations)
+      setPagination(response.data.pagination)
+      setSummary(response.data.summary)
+      return response.data
+    } else {
+      throw new Error(response.error || 'Failed to load quotations')
+    }
+  }, {
+    onError: (error) => showError('Error', `Failed to load quotations: ${error}`)
+  })
+
   useEffect(() => {
     loadQuotations()
-  }, [])
+  }, [loadQuotations])
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -110,37 +144,7 @@ export default function QuotationsPage() {
     }, 300)
 
     return () => clearTimeout(timeoutId)
-  }, [searchTerm, statusFilter, sortBy, sortOrder, dateFrom, dateTo, minAmount, maxAmount])
-
-  const loadQuotations = async (page = 1) => {
-    try {
-      setLoading(true)
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '20',
-        sortBy,
-        sortOrder,
-        ...(searchTerm && { search: searchTerm }),
-        ...(statusFilter !== 'all' && { status: statusFilter }),
-        ...(dateFrom && { dateFrom }),
-        ...(dateTo && { dateTo }),
-        ...(minAmount && { minAmount }),
-        ...(maxAmount && { maxAmount })
-      })
-
-      const response = await fetch(`/api/quotations?${params}`)
-      const data: QuotationsResponse = await response.json()
-
-      setQuotations(data.quotations)
-      setPagination(data.pagination)
-      setSummary(data.summary)
-    } catch (error) {
-      console.error('Error loading quotations:', error)
-      showError('Error', 'Failed to load quotations')
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [searchTerm, statusFilter, sortBy, sortOrder, dateFrom, dateTo, minAmount, maxAmount, loadQuotations])
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -599,7 +603,7 @@ export default function QuotationsPage() {
 
         {/* Quotations List */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          {loading ? (
+          {quotationsLoading ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>

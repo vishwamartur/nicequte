@@ -1,64 +1,51 @@
 import { prisma } from './prisma'
 import { CategoryType } from '@prisma/client'
 
-export async function seedDatabase() {
+export interface SeedResult {
+  success: boolean
+  message: string
+  error?: unknown
+  stats?: {
+    companiesCreated: number
+    businessNamesCreated: number
+    categoriesCreated: number
+    productsCreated: number
+    customersCreated: number
+  }
+}
+
+export async function seedDatabase(): Promise<SeedResult> {
+  const stats = {
+    companiesCreated: 0,
+    businessNamesCreated: 0,
+    categoriesCreated: 0,
+    productsCreated: 0,
+    customersCreated: 0
+  }
+
   try {
-    // Create default company
-    const company = await prisma.company.upsert({
-      where: { id: 'default-company' },
-      update: {},
-      create: {
-        id: 'default-company',
-        name: 'Professional Services Ltd.',
-        address: '123 Business Street, City, State 12345',
-        phone: '+91 98765 43210',
-        email: 'info@professionalservices.com',
-        gstNumber: '29ABCDE1234F1Z5',
-        gstRate: 18.0,
-      },
-    })
+    console.log('🌱 Starting database seeding...')
+
+    // Check if database already has essential data
+    const existingData = await checkExistingData()
+    if (existingData.hasEssentialData) {
+      console.log('✅ Database already contains essential data, skipping seeding')
+      return {
+        success: true,
+        message: 'Database already seeded',
+        stats
+      }
+    }
+
+    // Create default company with better error handling
+    console.log('📊 Creating default company...')
+    const company = await createOrUpdateCompany()
+    if (company.created) stats.companiesCreated++
 
     // Create default business names
-    const businessNames = [
-      {
-        name: 'Professional Services Ltd.',
-        description: 'Main business entity for professional plumbing and electrical services',
-        address: '123 Business Street, City, State 12345',
-        phone: '+91 98765 43210',
-        email: 'info@professionalservices.com',
-        gstNumber: '29ABCDE1234F1Z5',
-        isDefault: true,
-        isActive: true
-      },
-      {
-        name: 'Elite Plumbing Solutions',
-        description: 'Specialized plumbing services division',
-        address: '456 Service Avenue, City, State 12346',
-        phone: '+91 98765 43211',
-        email: 'plumbing@elitesolutions.com',
-        gstNumber: '29BCDEF2345G2A6',
-        isDefault: false,
-        isActive: true
-      },
-      {
-        name: 'PowerTech Electrical',
-        description: 'Professional electrical installation and maintenance',
-        address: '789 Electric Lane, City, State 12347',
-        phone: '+91 98765 43212',
-        email: 'electrical@powertech.com',
-        gstNumber: '29CDEFG3456H3B7',
-        isDefault: false,
-        isActive: true
-      }
-    ]
-
-    for (const businessData of businessNames) {
-      await prisma.businessName.upsert({
-        where: { name: businessData.name },
-        update: {},
-        create: businessData
-      })
-    }
+    console.log('🏢 Creating business names...')
+    const businessNamesCreated = await createBusinessNames()
+    stats.businessNamesCreated = businessNamesCreated
 
     // Create categories
     const plumbingCategory = await prisma.category.upsert({
