@@ -214,7 +214,8 @@ class DatabaseInitializer {
       
       if (isEmpty) {
         this.logger('info', 'Database is empty, proceeding with seeding')
-        seedingResult = await this.performSeeding()
+        const result = await this.performSeeding()
+        seedingResult = { success: result.success, error: result.error ?? undefined }
       } else {
         this.logger('info', 'Database already contains data, skipping seeding')
         seedingResult = { success: true, error: undefined }
