@@ -4,6 +4,9 @@ import Layout from '@/components/layout/Layout'
 import { useState, useEffect } from 'react'
 import { Plus, Minus, Search, Calculator, Save, Eye } from 'lucide-react'
 import { formatCurrency, calculateGST, generateQuotationNumber } from '@/lib/utils'
+import { apiClient } from '@/lib/api-client'
+import { useAsyncCallback, useDebouncedAsyncOperation } from '@/hooks/useAsyncOperation'
+import { ToastContainer, useToast } from '@/components/ui/Toast'
 
 interface Product {
   id: string
@@ -62,6 +65,8 @@ interface Customer {
 }
 
 export default function NewQuotationPage() {
+  const { toasts, removeToast, showSuccess, showError } = useToast()
+
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     name: '',
     email: '',
@@ -94,49 +99,85 @@ export default function NewQuotationPage() {
   const [description, setDescription] = useState('')
   const [notes, setNotes] = useState('')
 
-  // Load products for search
-  const loadProducts = async (search = '') => {
-    try {
-      const params = new URLSearchParams({
-        limit: '50',
-        ...(search && { search })
-      })
+  // Load products with enhanced error handling
+  const {
+    execute: loadProducts,
+    isLoading: productsLoading,
+    error: productsError
+  } = useAsyncCallback(async (search = '') => {
+    const params = new URLSearchParams({
+      limit: '50',
+      ...(search && { search })
+    })
 
-      const response = await fetch(`/api/products?${params}`)
-      const data = await response.json()
-      setProducts(data.products)
-    } catch (error) {
-      console.error('Error loading products:', error)
+    const response = await apiClient.get(`/api/products?${params}`)
+    if (response.success && response.data) {
+      setProducts(response.data.products)
+      return response.data.products
+    } else {
+      throw new Error(response.error || 'Failed to load products')
     }
-  }
+  }, {
+    onError: (error) => showError('Error', `Failed to load products: ${error}`)
+  })
 
-  // Load business names
-  const loadBusinessNames = async () => {
-    try {
-      const response = await fetch('/api/business-names')
-      const data = await response.json()
-      setBusinessNames(data)
+  // Load business names with enhanced error handling
+  const {
+    execute: loadBusinessNames,
+    isLoading: businessNamesLoading,
+    error: businessNamesError
+  } = useAsyncCallback(async () => {
+    const response = await apiClient.get('/api/business-names')
+    if (response.success && response.data) {
+      setBusinessNames(response.data)
 
       // Set default business name if available
-      const defaultBusinessName = data.find((bn: BusinessName) => bn.isDefault)
+      const defaultBusinessName = response.data.find((bn: BusinessName) => bn.isDefault)
       if (defaultBusinessName) {
         setSelectedBusinessNameId(defaultBusinessName.id)
       }
-    } catch (error) {
-      console.error('Error loading business names:', error)
-    }
-  }
 
-  // Load customers
-  const loadCustomers = async () => {
-    try {
-      const response = await fetch('/api/customers?limit=100')
-      const data = await response.json()
-      setCustomers(data.customers)
-    } catch (error) {
-      console.error('Error loading customers:', error)
+      return response.data
+    } else {
+      throw new Error(response.error || 'Failed to load business names')
     }
-  }
+  }, {
+    onError: (error) => showError('Error', `Failed to load business names: ${error}`)
+  })
+
+  // Load customers with enhanced error handling
+  const {
+    execute: loadCustomers,
+    isLoading: customersLoading,
+    error: customersError
+  } = useAsyncCallback(async () => {
+    const response = await apiClient.get('/api/customers?limit=100')
+    if (response.success && response.data) {
+      setCustomers(response.data.customers)
+      return response.data.customers
+    } else {
+      throw new Error(response.error || 'Failed to load customers')
+    }
+  }, {
+    onError: (error) => showError('Error', `Failed to load customers: ${error}`)
+  })
+
+  // Debounced product search
+  const {
+    execute: searchProducts,
+    isLoading: searchLoading
+  } = useDebouncedAsyncOperation(
+    async () => {
+      if (searchTerm.trim()) {
+        await loadProducts(searchTerm.trim())
+      }
+    },
+    [searchTerm],
+    300,
+    {
+      onError: (error) => showError('Search Error', `Failed to search products: ${error}`)
+    }
+  )
 
   useEffect(() => {
     // Generate quotation number on client side only to avoid hydration mismatch
@@ -144,7 +185,7 @@ export default function NewQuotationPage() {
     loadProducts()
     loadBusinessNames()
     loadCustomers()
-  }, [])
+  }, [loadProducts, loadBusinessNames, loadCustomers])
 
   useEffect(() => {
     if (searchTerm) {
@@ -943,6 +984,9 @@ export default function NewQuotationPage() {
           </div>
         </form>
       </div>
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </Layout>
   )
 }

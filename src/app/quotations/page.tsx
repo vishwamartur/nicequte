@@ -24,6 +24,8 @@ import {
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { generateQuotationPDF, printElement } from '@/lib/pdf-generator'
+import { apiClient } from '@/lib/api-client'
+import { useAsyncCallback, useDebouncedAsyncOperation } from '@/hooks/useAsyncOperation'
 import Link from 'next/link'
 
 interface Quotation {
@@ -101,7 +103,7 @@ export default function QuotationsPage() {
 
   useEffect(() => {
     loadQuotations()
-  }, [])
+  }, [loadQuotations])
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -110,37 +112,42 @@ export default function QuotationsPage() {
     }, 300)
 
     return () => clearTimeout(timeoutId)
-  }, [searchTerm, statusFilter, sortBy, sortOrder, dateFrom, dateTo, minAmount, maxAmount])
+  }, [searchTerm, statusFilter, sortBy, sortOrder, dateFrom, dateTo, minAmount, maxAmount, loadQuotations])
 
-  const loadQuotations = async (page = 1) => {
-    try {
-      setLoading(true)
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '20',
-        sortBy,
-        sortOrder,
-        ...(searchTerm && { search: searchTerm }),
-        ...(statusFilter !== 'all' && { status: statusFilter }),
-        ...(dateFrom && { dateFrom }),
-        ...(dateTo && { dateTo }),
-        ...(minAmount && { minAmount }),
-        ...(maxAmount && { maxAmount })
-      })
+  // Enhanced quotations loading with proper error handling
+  const {
+    execute: loadQuotations,
+    isLoading: quotationsLoading,
+    error: quotationsError
+  } = useAsyncCallback(async (page = 1) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: '20',
+      sortBy,
+      sortOrder,
+      ...(searchTerm && { search: searchTerm }),
+      ...(statusFilter !== 'all' && { status: statusFilter }),
+      ...(dateFrom && { dateFrom }),
+      ...(dateTo && { dateTo }),
+      ...(minAmount && { minAmount }),
+      ...(maxAmount && { maxAmount })
+    })
 
-      const response = await fetch(`/api/quotations?${params}`)
-      const data: QuotationsResponse = await response.json()
-
-      setQuotations(data.quotations)
-      setPagination(data.pagination)
-      setSummary(data.summary)
-    } catch (error) {
-      console.error('Error loading quotations:', error)
-      showError('Error', 'Failed to load quotations')
-    } finally {
-      setLoading(false)
+    const response = await apiClient.get(`/api/quotations?${params}`)
+    if (response.success && response.data) {
+      setQuotations(response.data.quotations)
+      setPagination(response.data.pagination)
+      setSummary(response.data.summary)
+      return response.data
+    } else {
+      throw new Error(response.error || 'Failed to load quotations')
     }
-  }
+  }, {
+    onError: (error) => showError('Error', `Failed to load quotations: ${error}`)
+  })
+
+  // Update loading state to use the new hook
+  const loading = quotationsLoading
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)

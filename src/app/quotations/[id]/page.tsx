@@ -19,6 +19,10 @@ import {
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { generateQuotationPDF, printElement } from '@/lib/pdf-generator'
+import { apiClient } from '@/lib/api-client'
+import { useAsyncCallback } from '@/hooks/useAsyncOperation'
+import { useSafeState } from '@/hooks/useSafeState'
+import { ErrorRecovery, NetworkStatus, RetryWrapper } from '@/components/ui/ErrorRecovery'
 import '../../../styles/pdf-compatible.css'
 
 interface QuotationItem {
@@ -90,41 +94,42 @@ export default function QuotationDetailPage() {
   const router = useRouter()
   const { toasts, removeToast, showSuccess, showError } = useToast()
   
-  const [quotation, setQuotation] = useState<Quotation | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [statusLoading, setStatusLoading] = useState(false)
-  const [printLoading, setPrintLoading] = useState(false)
-  const [pdfLoading, setPdfLoading] = useState(false)
+  const [quotation, setQuotation] = useSafeState<Quotation | null>(null)
+  const [statusLoading, setStatusLoading] = useSafeState(false)
+  const [printLoading, setPrintLoading] = useSafeState(false)
+  const [pdfLoading, setPdfLoading] = useSafeState(false)
+
+  // Enhanced quotation loading with proper error handling
+  const {
+    execute: loadQuotation,
+    isLoading: loading,
+    error: loadError
+  } = useAsyncCallback(async (id: string) => {
+    const response = await apiClient.get(`/api/quotations/${id}`)
+
+    if (response.success && response.data) {
+      setQuotation(response.data)
+      return response.data
+    } else if (response.status === 404) {
+      showError('Not Found', 'Quotation not found')
+      router.push('/quotations')
+      throw new Error('Quotation not found')
+    } else {
+      throw new Error(response.error || 'Failed to load quotation')
+    }
+  }, {
+    onError: (error) => {
+      if (!error.includes('not found')) {
+        showError('Error', `Failed to load quotation: ${error}`)
+      }
+    }
+  })
 
   useEffect(() => {
     if (params.id) {
       loadQuotation(params.id as string)
     }
-  }, [params.id])
-
-  const loadQuotation = async (id: string) => {
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/quotations/${id}`)
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          showError('Not Found', 'Quotation not found')
-          router.push('/quotations')
-          return
-        }
-        throw new Error('Failed to load quotation')
-      }
-
-      const data = await response.json()
-      setQuotation(data)
-    } catch (error) {
-      console.error('Error loading quotation:', error)
-      showError('Error', 'Failed to load quotation')
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [params.id, loadQuotation])
 
   const updateStatus = async (newStatus: string) => {
     if (!quotation) return
@@ -239,9 +244,26 @@ export default function QuotationDetailPage() {
     )
   }
 
+  // Show error recovery if there's a load error
+  if (loadError && !quotation) {
+    return (
+      <Layout>
+        <div className="space-y-6">
+          <NetworkStatus />
+          <ErrorRecovery
+            error={loadError}
+            onRetry={() => params.id && loadQuotation(params.id as string)}
+            retryText="Reload Quotation"
+          />
+        </div>
+      </Layout>
+    )
+  }
+
   return (
     <Layout>
       <div className="space-y-6">
+        <NetworkStatus />
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
