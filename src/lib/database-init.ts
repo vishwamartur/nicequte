@@ -67,7 +67,11 @@ class DatabaseInitializer {
     try {
       this.logger('debug', 'Testing database connection...')
       await prisma.$connect()
-      await prisma.$queryRaw`SELECT 1`
+
+      // Test connection with a simple query compatible with MongoDB
+      // Use a basic model query instead of raw SQL which isn't available for MongoDB
+      await prisma.company.findFirst()
+
       this.logger('info', 'Database connection successful')
       return true
     } catch (error) {
