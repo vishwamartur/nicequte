@@ -181,14 +181,28 @@ class BrowserCompatibility {
     if (!window.fetch) {
       this.loadPolyfill('fetch', () => {
         // Simple fetch polyfill for basic functionality
-        window.fetch = async (url: string, options: any = {}) => {
+        window.fetch = async (input: URL | RequestInfo, init?: RequestInit) => {
           return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest()
+
+            // Handle different input types (string, URL, Request)
+            let url: string
+            if (typeof input === 'string') {
+              url = input
+            } else if (input instanceof URL) {
+              url = input.toString()
+            } else if (input instanceof Request) {
+              url = input.url
+            } else {
+              url = String(input)
+            }
+
+            const options = init || {}
             xhr.open(options.method || 'GET', url)
-            
+
             if (options.headers) {
               Object.keys(options.headers).forEach(key => {
-                xhr.setRequestHeader(key, options.headers[key])
+                xhr.setRequestHeader(key, (options.headers as any)[key])
               })
             }
 
@@ -203,7 +217,7 @@ class BrowserCompatibility {
             }
 
             xhr.onerror = () => reject(new Error('Network error'))
-            xhr.send(options.body)
+            xhr.send(options.body as any)
           })
         }
       })
