@@ -71,7 +71,6 @@ export default function QuotationsPage() {
   const { toasts, removeToast, showSuccess, showError } = useToast()
 
   const [quotations, setQuotations] = useState<Quotation[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [sortBy, setSortBy] = useState('createdAt')
@@ -146,8 +145,7 @@ export default function QuotationsPage() {
     onError: (error) => showError('Error', `Failed to load quotations: ${error}`)
   })
 
-  // Update loading state to use the new hook
-  const loading = quotationsLoading
+  // Use quotationsLoading directly instead of creating a new loading variable
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -606,7 +604,7 @@ export default function QuotationsPage() {
 
         {/* Quotations List */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          {loading ? (
+          {quotationsLoading ? (
             <div className="flex justify-center items-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
