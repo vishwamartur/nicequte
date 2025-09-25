@@ -23,7 +23,6 @@ import { apiClient } from '@/lib/api-client'
 import { useAsyncCallback } from '@/hooks/useAsyncOperation'
 import { useSafeState } from '@/hooks/useSafeState'
 import { ErrorRecovery, NetworkStatus, RetryWrapper } from '@/components/ui/ErrorRecovery'
-import '../../../styles/pdf-compatible.css'
 
 interface QuotationItem {
   id: string
