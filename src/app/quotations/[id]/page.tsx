@@ -28,6 +28,9 @@ interface QuotationItem {
   lineTotal: number
   description: string | null
   isCustom: boolean
+  customName: string | null
+  customUnit: string | null
+  customDescription: string | null
   product: {
     id: string
     name: string
@@ -37,7 +40,7 @@ interface QuotationItem {
       name: string
       type: 'PLUMBING' | 'ELECTRICAL'
     }
-  }
+  } | null
 }
 
 interface Customer {
@@ -385,12 +388,17 @@ export default function QuotationDetailPage() {
           } : undefined}
           items={quotation.items.map(item => ({
             id: item.id,
-            product: {
+            product: item.product ? {
               name: item.product.name,
               description: item.product.description,
               unit: item.product.unit,
               category: item.product.category
-            },
+            } : null,
+            customProduct: item.isCustom ? {
+              name: item.customName || 'Custom Product',
+              description: item.customDescription || item.description,
+              unit: item.customUnit || 'piece'
+            } : undefined,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             lineTotal: item.lineTotal,
