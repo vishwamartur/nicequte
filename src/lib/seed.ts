@@ -1,8 +1,35 @@
 import { prisma } from './prisma'
 import { CategoryType } from '@prisma/client'
 
+export async function checkIfDatabaseNeedsSeeding(): Promise<boolean> {
+  try {
+    // Check if we have any products, categories, or companies
+    const [productCount, categoryCount, companyCount] = await Promise.all([
+      prisma.product.count(),
+      prisma.category.count(),
+      prisma.company.count()
+    ])
+
+    // Database needs seeding if any of these are empty
+    return productCount === 0 || categoryCount === 0 || companyCount === 0
+  } catch (error) {
+    console.error('Error checking database status:', error)
+    // If we can't check, assume it needs seeding
+    return true
+  }
+}
+
 export async function seedDatabase() {
   try {
+    console.log('🌱 Starting database seeding...')
+
+    // Check if seeding is actually needed
+    const needsSeeding = await checkIfDatabaseNeedsSeeding()
+    if (!needsSeeding) {
+      console.log('✅ Database already contains data, skipping seeding')
+      return { success: true, message: 'Database already seeded' }
+    }
+
     // Create default company
     const company = await prisma.company.upsert({
       where: { id: 'default-company' },
@@ -235,8 +262,13 @@ export async function seedDatabase() {
       })
     }
 
-    console.log('Database seeded successfully!')
-    return { success: true, message: 'Database seeded successfully!' }
+    console.log('🎉 Database seeded successfully!')
+    console.log(`✅ Created ${plumbingProducts.length + electricalProducts.length} products`)
+    console.log('✅ Created 2 categories (Plumbing & Electrical)')
+    console.log('✅ Created 3 business names')
+    console.log('✅ Created default company')
+
+    return { success: true, message: 'Database seeded successfully with sample data!' }
   } catch (error) {
     console.error('Error seeding database:', error)
     return { success: false, error: error }
