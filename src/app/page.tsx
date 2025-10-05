@@ -35,14 +35,10 @@ export default function Dashboard() {
 
       // Check if database needs seeding
       const statusResponse = await fetch('/api/seed/status')
-      const statusData = await statusResponse.json()
-      // Check if database needs seeding
-      const statusResponse = await fetch('/api/seed/status')
       if (!statusResponse.ok) {
         throw new Error('Seed status check failed')
       }
       const statusData = await statusResponse.json()
-
       if (statusData.needsSeeding) {
         console.log('Database needs seeding, auto-seeding...')
 
