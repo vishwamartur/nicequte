@@ -54,8 +54,10 @@ export default function Dashboard() {
           setIsSeeded(!statusData.needsSeeding)
         }
       } else {
+      } else {
         console.log('Database already seeded')
         setIsSeeded(true)
+        loadStats()
       }
     } catch (error) {
       console.error('Error during auto-seeding:', error)
