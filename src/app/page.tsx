@@ -26,10 +26,51 @@ export default function Dashboard() {
     monthlyRevenue: 0,
     pendingQuotations: 0
   })
-  const [isSeeded, setIsSeeded] = useState(false)
+  const [isSeeded, setIsSeeded] = useState(true) // Default to true to avoid showing prompt initially
+  const [seedingInProgress, setSeedingInProgress] = useState(false)
 
-  const seedDatabase = async () => {
+  const checkAndAutoSeed = async () => {
     try {
+      setSeedingInProgress(true)
+
+      // Check if database needs seeding
+      const statusResponse = await fetch('/api/seed/status')
+      if (!statusResponse.ok) {
+        throw new Error('Seed status check failed')
+      }
+      const statusData = await statusResponse.json()
+      if (statusData.needsSeeding) {
+        console.log('Database needs seeding, auto-seeding...')
+
+        // Automatically seed the database
+        const seedResponse = await fetch('/api/seed/auto', { method: 'POST' })
+        const seedData = await seedResponse.json()
+
+        if (seedResponse.ok && seedData.seeded) {
+          console.log('Database seeded successfully:', seedData.message)
+          setIsSeeded(true)
+          // Refresh stats after seeding
+          loadStats()
+        } else {
+          console.log('Seeding skipped or failed:', seedData.message)
+          setIsSeeded(!statusData.needsSeeding)
+        }
+      } else {
+        console.log('Database already seeded')
+        setIsSeeded(true)
+      }
+    } catch (error) {
+      console.error('Error during auto-seeding:', error)
+      // On error, show manual seeding option
+      setIsSeeded(false)
+    } finally {
+      setSeedingInProgress(false)
+    }
+  }
+
+  const manualSeedDatabase = async () => {
+    try {
+      setSeedingInProgress(true)
       const response = await fetch('/api/seed', { method: 'POST' })
       if (response.ok) {
         setIsSeeded(true)
@@ -38,6 +79,8 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Error seeding database:', error)
+    } finally {
+      setSeedingInProgress(false)
     }
   }
 
@@ -57,7 +100,8 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    loadStats()
+    // Check and auto-seed database on first load
+    checkAndAutoSeed()
   }, [])
 
   const quickActions = [
@@ -122,23 +166,41 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Seed Database Button */}
-        {!isSeeded && (
+        {/* Auto-seeding status and manual fallback */}
+        {seedingInProgress && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center space-x-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <div>
+                <h3 className="text-sm font-medium text-blue-800">
+                  Initializing Database
+                </h3>
+                <p className="text-sm text-blue-700 mt-1">
+                  Setting up sample data for first-time use...
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Manual seed fallback (only shown if auto-seeding failed) */}
+        {!isSeeded && !seedingInProgress && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-medium text-yellow-800">
-                  Initialize Sample Data
+                  Manual Database Setup Required
                 </h3>
                 <p className="text-sm text-yellow-700 mt-1">
-                  Click to populate the database with sample products and categories.
+                  Automatic setup failed. Click to manually populate the database with sample data.
                 </p>
               </div>
               <button
-                onClick={seedDatabase}
-                className="bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-yellow-700 transition-colors"
+                onClick={manualSeedDatabase}
+                disabled={seedingInProgress}
+                className="bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-yellow-700 transition-colors disabled:opacity-50"
               >
-                Seed Database
+                Setup Database
               </button>
             </div>
           </div>
@@ -198,19 +260,19 @@ export default function Dashboard() {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Getting Started</h2>
           <div className="space-y-4">
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">
-                1
+              <div className="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-medium">
+                ✓
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">Initialize Sample Data</h3>
+                <h3 className="font-medium text-gray-900">Sample Data Ready</h3>
                 <p className="text-sm text-gray-600">
-                  Click the &quot;Seed Database&quot; button above to populate your catalog with sample plumbing and electrical products.
+                  Your database is automatically populated with sample plumbing and electrical products on first visit.
                 </p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">
-                2
+                1
               </div>
               <div>
                 <h3 className="font-medium text-gray-900">Browse Products</h3>
@@ -221,7 +283,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">
-                3
+                2
               </div>
               <div>
                 <h3 className="font-medium text-gray-900">Create Your First Quotation</h3>
