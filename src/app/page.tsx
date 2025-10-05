@@ -36,6 +36,12 @@ export default function Dashboard() {
       // Check if database needs seeding
       const statusResponse = await fetch('/api/seed/status')
       const statusData = await statusResponse.json()
+      // Check if database needs seeding
+      const statusResponse = await fetch('/api/seed/status')
+      if (!statusResponse.ok) {
+        throw new Error('Seed status check failed')
+      }
+      const statusData = await statusResponse.json()
 
       if (statusData.needsSeeding) {
         console.log('Database needs seeding, auto-seeding...')
@@ -54,10 +60,8 @@ export default function Dashboard() {
           setIsSeeded(!statusData.needsSeeding)
         }
       } else {
-      } else {
         console.log('Database already seeded')
         setIsSeeded(true)
-        loadStats()
       }
     } catch (error) {
       console.error('Error during auto-seeding:', error)
